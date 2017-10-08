@@ -1,0 +1,5 @@
+language: csharp
+mono: none
+solution: WebApplication1.sln
+install:
+  - nuget restore WebApplication1.sln
