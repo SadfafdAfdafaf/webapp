@@ -6,6 +6,6 @@ dist: trusty
 script:
  - dotnet restore
 install:
-  - nuget restore WebApplication1.sln
+  - nget restore WebApplication1.sln
 script:
   - dotnet test ".WebAndLoadTestProject1/WebAndLoadTestProject1"
