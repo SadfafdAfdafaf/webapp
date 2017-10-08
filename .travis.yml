@@ -6,4 +6,4 @@ dist: trusty
 script:
  - dotnet restore
 script:
-  - dotnet test ".WebAndLoadTestProject1/WebAndLoadTestProject1"
+  - dotnet test ".WebAndLoadTestProject1/"
