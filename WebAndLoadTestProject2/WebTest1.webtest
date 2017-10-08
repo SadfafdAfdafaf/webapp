@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebTest Name="WebTest1" Id="3f3a34ef-cda5-45ed-ac12-9ceb855fdde6" Owner="" Priority="2147483647" Enabled="True" CssProjectStructure="" CssIteration="" Timeout="0" WorkItemIds="" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010" Description="" CredentialUserName="" CredentialPassword="" PreAuthenticate="True" Proxy="default" StopOnError="False" RecordedResultFile="" ResultsLocale="">
+  <Items>
+    <Request Method="POST" Guid="3d207448-9601-45f8-819e-7997bfecba01" Version="1.1" Url="http://rcoi.apphb.com/hello/ass" ThinkTime="0" Timeout="300" ParseDependentRequests="True" FollowRedirects="True" RecordResult="True" Cache="False" ResponseTimeGoal="0" Encoding="utf-8" ExpectedHttpStatusCode="0" ExpectedResponseUrl="" ReportingName="" IgnoreHttpStatusCode="False">
+      <ValidationRules>
+        <ValidationRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.ValidateResponseUrl, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="URL-адрес отклика" Description="Проверка того, что URL-адрес отклика после выполнения перенаправлений такой же, как записанный URL-адрес отклика.  Параметры QueryString игнорируются." Level="Low" ExectuionOrder="BeforeDependents" />
+        <ValidationRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.ValidationRuleResponseTimeGoal, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="Целевое время отклика" Description="Проверка на превышение временем отклика на запрос эталона времени отклика, указанного в запросе.  Цели времени отклика, равные нулю, будут пропущены." Level="Low" ExectuionOrder="AfterDependents">
+          <RuleParameters>
+            <RuleParameter Name="Tolerance" Value="0" />
+          </RuleParameters>
+        </ValidationRule>
+      </ValidationRules>
+      <StringHttpBody ContentType="" InsertByteOrderMark="False">
+      </StringHttpBody>
+    </Request>
+    <Condition UniqueStringId="7e5518c0-bb4f-4d4e-83f6-3bdf7191e49f">
+      <ConditionalRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.LastResponseCodeRule, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="Последний код отклика" Description="Проверьте код состояния HTTP предыдущего отклика.">
+        <RuleParameters>
+          <RuleParameter Name="ComparisonOperator" Value="равно" />
+          <RuleParameter Name="ResponseCode" Value="200 - Ok" />
+        </RuleParameters>
+      </ConditionalRule>
+      <Then />
+      <Else />
+    </Condition>
+    <Request Method="GET" Guid="05b4436b-40ae-48d3-8998-7560b5373969" Version="1.1" Url="http://rcoi.apphb.com/hello/Fass" ThinkTime="0" Timeout="300" ParseDependentRequests="True" FollowRedirects="True" RecordResult="True" Cache="False" ResponseTimeGoal="0" Encoding="utf-8" ExpectedHttpStatusCode="0" ExpectedResponseUrl="" ReportingName="" IgnoreHttpStatusCode="True">
+      <ValidationRules>
+        <ValidationRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.ValidateResponseUrl, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="URL-адрес отклика" Description="Проверка того, что URL-адрес отклика после выполнения перенаправлений такой же, как записанный URL-адрес отклика.  Параметры QueryString игнорируются." Level="Low" ExectuionOrder="BeforeDependents" />
+        <ValidationRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.ValidationRuleResponseTimeGoal, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="Целевое время отклика" Description="Проверка на превышение временем отклика на запрос эталона времени отклика, указанного в запросе.  Цели времени отклика, равные нулю, будут пропущены." Level="Low" ExectuionOrder="AfterDependents">
+          <RuleParameters>
+            <RuleParameter Name="Tolerance" Value="0" />
+          </RuleParameters>
+        </ValidationRule>
+      </ValidationRules>
+    </Request>
+    <Condition UniqueStringId="3d7b960f-3906-458d-ae19-6179b0ab2cbf">
+      <ConditionalRule Classname="Microsoft.VisualStudio.TestTools.WebTesting.Rules.LastResponseCodeRule, Microsoft.VisualStudio.QualityTools.WebTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" DisplayName="Последний код отклика" Description="Проверьте код состояния HTTP предыдущего отклика.">
+        <RuleParameters>
+          <RuleParameter Name="ComparisonOperator" Value="равно" />
+          <RuleParameter Name="ResponseCode" Value="404 - NotFound" />
+        </RuleParameters>
+      </ConditionalRule>
+      <Then />
+      <Else />
+    </Condition>
+  </Items>
+</WebTest>
