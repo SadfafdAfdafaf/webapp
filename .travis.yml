@@ -5,6 +5,6 @@ dist: trusty
 before_script:
  - dotnet restore
 script:
-  - dotnet build
+  - dotnet build WebAndLoadTestProject1/WebAndLoadTestProject1.csproj -c Release -f net451
   - dotnet test WebAndLoadTestProject1/WebAndLoadTestProject1.csproj
   
