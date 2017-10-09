@@ -1,9 +1,11 @@
 language: csharp
-mono: none
+sudo: required  
 dotnet: 2.0.0
 dist: trusty
 before_script:
  - dotnet restore
 script:
-  - dotnet test ./WebAndLoadTestProject1 -c Release -f net451
+  - dotnet build ./WebAndLoadTestProject1 -c Release -f net451
+  mono \  
+  ./WebAndLoadTestProject1/bin/Release/net451/*/dotnet-test-xunit.exe
   
