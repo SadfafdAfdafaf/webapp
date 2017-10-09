@@ -1,9 +1,8 @@
 language: csharp
 mono: none
-solution: WebApplication1.sln
 dotnet: 2.0.0
 dist: trusty
-script:
+before_script:
  - dotnet restore
 script:
-  - dotnet test ".WebAndLoadTestProject1/"
+  - dotnet test "./WebAndLoadTestProject1"
