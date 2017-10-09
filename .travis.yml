@@ -5,7 +5,6 @@ dist: trusty
 before_script:
  - dotnet restore
 script:
-  - dotnet build ./WebAndLoadTestProject1 -c Release -f net451
-  mono \  
-  ./WebAndLoadTestProject1/bin/Release/net451/*/dotnet-test-xunit.exe
+  - dotnet build
+  - dotnet test WebAndLoadTestProject1/WebAndLoadTestProject1.csproj
   
