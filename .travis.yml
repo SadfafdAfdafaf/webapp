@@ -1,5 +1,10 @@
 language: csharp
-mono: none
-solution: WebApplication1.sln
-install:
-  - nuget restore WebApplication1.sln
+sudo: required  
+dotnet: 2.0.0
+dist: trusty
+before_script:
+ - dotnet restore
+script:
+  - dotnet build WebAndLoadTestProject1/WebAndLoadTestProject1.csproj -c Release -f net451
+  - dotnet test WebAndLoadTestProject1/WebAndLoadTestProject1.csproj
+  
