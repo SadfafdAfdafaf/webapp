@@ -12,7 +12,7 @@ namespace WebApplication1.Controllers
         // GET: /Hello/
         public ActionResult Index()
         {
-            return View();
+            return View("Index");
         }
 
         public ActionResult ass()
