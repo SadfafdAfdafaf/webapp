@@ -1,10 +1,8 @@
 language: csharp
-sudo: required  
-dotnet: 2.0.0
-dist: trusty
-before_script:
- - dotnet restore
+solution: WebApplication1.sln
+install:
+  - nuget restore WebApplication1.sln
+  - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
 script:
-  - dotnet build WebAndLoadTestProject1/WebAndLoadTestProject1.csproj -c Release -f net451
-  - dotnet test WebAndLoadTestProject1/WebAndLoadTestProject1.csproj
-  
+  - msbuild /p:Configuration=Release /p:Platform="Any CPU" WebApplication1.sln
+  - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./WebAndLoadTestProject1/bin/Release/WebAndLoadTestProject1.dll
