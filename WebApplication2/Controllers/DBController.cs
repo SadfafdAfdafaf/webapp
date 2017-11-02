@@ -9,9 +9,33 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using WebApplication2.Models;
+using System.Web.OData;
 
 namespace WebApplication2.Controllers
 {
+    public class CompInfController : ODataController
+    {
+        private DBContext db = new DBContext();
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
+        }
+
+        [EnableQuery]
+        public IQueryable<Worker> Get()
+        {
+            return db.Workers.AsQueryable();
+        }
+
+        [EnableQuery]
+        public SingleResult<Worker> Get([FromODataUri] int key)
+        {
+            IQueryable<Worker> result = db.Workers.Where(p => p.Id == key);
+            return SingleResult.Create(result);
+        }
+    }
+
     public class DBController : ApiController
     {
         private DBContext db = new DBContext();

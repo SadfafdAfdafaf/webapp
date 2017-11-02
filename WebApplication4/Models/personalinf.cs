@@ -8,7 +8,6 @@ namespace WebApplication4.Models
     public class personalinf
     {
         public int Id { get; set; }
-        public string position { get; set; }
         public string claster { get; set; }
     }
 }

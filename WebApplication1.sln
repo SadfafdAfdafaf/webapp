@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{C43B9263-822E-4673-B584-F5545E739ADE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{178C4E15-C986-4C09-A465-DC87024A0B93} = {178C4E15-C986-4C09-A465-DC87024A0B93}
+		{B047B37E-F914-4805-94A6-00108ADB13AF} = {B047B37E-F914-4805-94A6-00108ADB13AF}
+		{73C6D9B3-26A6-42AE-8112-C34042500FE8} = {73C6D9B3-26A6-42AE-8112-C34042500FE8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAndLoadTestProject1", "WebAndLoadTestProject1\WebAndLoadTestProject1.csproj", "{FEF8FC89-3C45-4E7E-A3D2-FDE1084CACFF}"
 EndProject

@@ -10,6 +10,6 @@ namespace WebApplication3.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public string CEO { get; set; }
-        public string region { get; set; }
+        public int region { get; set; }
     }
 }

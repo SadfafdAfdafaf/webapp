@@ -6,7 +6,7 @@ using System.Web;
 
 namespace WebApplication4.Models
 {
-    public class personalContext : DbContext
+    public class PersonalContext : DbContext
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -15,7 +15,7 @@ namespace WebApplication4.Models
         // For more information refer to the documentation:
         // http://msdn.microsoft.com/en-us/data/jj591621.aspx
     
-        public personalContext() : base("name=personalContext")
+        public PersonalContext() : base("name=PersonalContext")
         {
         }
 

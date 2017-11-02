@@ -41,7 +41,7 @@
                     GET /hello/getworkers
                 </td>
                 <td>
-                    <button @Html.ActionLink("Get из БД работников ", "getworkers", "hello") ></button>
+                    @Html.ActionLink("Get из БД работников ", "getworkers")
                 </td>
             </tr>
             <tr>
@@ -49,7 +49,7 @@
                     GET /hello/getsomeworkers?&Company=Microsoft
                 </td>
                 <td>
-                    <button @Html.ActionLink("Get из бд работников компании microsoft", "getsomeworkers", "hello")></button>
+                    @Html.ActionLink("Get из бд работников компании microsoft", "getsomeworkers", "hello")
                 </td>
             </tr>
             <tr>
@@ -57,7 +57,7 @@
                     DELETE /hello/deletecompany?&Name=Microsoft
                 </td>
                 <td>
-                    <button @Html.ActionLink("Удаление целой компании microsoft", "deletecompany", "hello")></button>
+                    @Html.ActionLink("Удаление целой компании microsoft", "deletecompany", "hello")
                 </td>
             </tr>
             <tr>
@@ -65,7 +65,7 @@
                     POST /hello/adcompany?&amp;Name=Microsoft&amp;CEO={Meme JD}&amp;position=CEO&amp;region=Canada&amp;claster=NA&amp;Cost=450
                 </td>
                 <td>
-                    <button @Html.ActionLink("Добавление целой компании microsoft", "addcompany", "hello")></button>
+                    @Html.ActionLink("Добавление целой компании microsoft", "addcompany", "hello")
                 </td>
             </tr>
         </tbody>

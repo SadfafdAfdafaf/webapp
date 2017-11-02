@@ -10,12 +10,35 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using WebApplication4.Models;
+using System.Web.OData;
 
 namespace WebApplication4.Controllers
 {
+    public class CompInfController : ODataController
+    {
+        private PersonalContext db = new PersonalContext();
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
+        }
+
+        [EnableQueryAttribute]
+        public IQueryable<personalinf> Get()
+        {
+            return db.personalinfs.AsQueryable();
+        }
+
+        [EnableQuery]
+        public SingleResult<personalinf> Get([FromODataUri] int key)
+        {
+            IQueryable<personalinf> result = db.personalinfs.Where(p => p.Id == key);
+            return SingleResult.Create(result);
+        }
+    }
     public class DBController : ApiController
     {
-        private personalContext db = new personalContext();
+        private PersonalContext db = new PersonalContext();
 
         // GET api/DB
         public IQueryable<personalinf> Getpersonalinfs()

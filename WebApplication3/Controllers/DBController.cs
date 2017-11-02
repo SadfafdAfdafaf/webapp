@@ -10,15 +10,39 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using WebApplication3.Models;
+using System.Web.OData;
 
 namespace WebApplication3.Controllers
 {
+
+    public class CompInfController : ODataController
+    {
+        private DBContext db = new DBContext();
+        protected override void Dispose(bool disposing)
+        {
+            db.Dispose();
+            base.Dispose(disposing);
+        }
+
+        [EnableQuery]
+        public IQueryable<companies> Get()
+        {   
+            return db.companies.AsQueryable();
+        }
+
+        [EnableQuery]
+        public SingleResult<companies> Get([FromODataUri] int key)
+        {
+            IQueryable<companies> result = db.companies.Where(p => p.Id == key);
+            return SingleResult.Create(result);
+        }
+    }
+
     public class DBController : ApiController
     {
-        private CompaniesContext db = new CompaniesContext();
+        private DBContext db = new DBContext();
 
         // GET api/DB
-        [Queryable]
         public IQueryable<companies> Getcompanies()
         {
             return db.companies;
