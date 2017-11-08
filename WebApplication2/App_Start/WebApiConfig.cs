@@ -18,6 +18,7 @@ namespace WebApplication2
             config.MapHttpAttributeRoutes();
 
             ODataModelBuilder builder = new ODataConventionModelBuilder();
+            config.Filter().Expand().Select().OrderBy().MaxTop(null).Count();
             builder.EntitySet<Worker>("CompInf");
             config.MapODataServiceRoute(
                 routeName: "odata",

@@ -6,7 +6,7 @@ using System.Web;
 
 namespace WebApplication4.Models
 {
-    public class PersonalContext : DbContext
+    public class PersonalContext : DbContext, IRegionContext
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -20,6 +20,11 @@ namespace WebApplication4.Models
         }
 
         public System.Data.Entity.DbSet<WebApplication4.Models.personalinf> personalinfs { get; set; }
+
+        public void MarkAsModified(personalinf item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
     
     }
 }

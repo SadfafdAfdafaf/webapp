@@ -6,7 +6,7 @@ using System.Web;
 
 namespace WebApplication3.Models
 {
-    public class DBContext : DbContext
+    public class DBContext : DbContext, ICompaniesContext
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -20,6 +20,11 @@ namespace WebApplication3.Models
         }
 
         public System.Data.Entity.DbSet<WebApplication3.Models.companies> companies { get; set; }
+
+        public void MarkAsModified(companies item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
     
     }
 }

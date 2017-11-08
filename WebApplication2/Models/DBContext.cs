@@ -6,7 +6,7 @@ using System.Web;
 
 namespace WebApplication2.Models
 {
-    public class DBContext : DbContext
+    public class DBContext : DbContext, IWorkerContext
     {
         // You can add custom code to this file. Changes will not be overwritten.
         // 
@@ -20,6 +20,11 @@ namespace WebApplication2.Models
         }
 
         public System.Data.Entity.DbSet<WebApplication2.Models.Worker> Workers { get; set; }
+
+        public void MarkAsModified(Worker item)
+        {
+            Entry(item).State = EntityState.Modified;
+        }
     
     }
 }
