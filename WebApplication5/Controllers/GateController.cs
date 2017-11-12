@@ -11,6 +11,8 @@ using WebApplication5.Models;
 using PagedList.Mvc;
 using PagedList;
 using NLog;
+using System.Messaging;
+
 
 namespace WebApplication5.Controllers
 {
@@ -19,6 +21,97 @@ namespace WebApplication5.Controllers
     {
         
         private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public GateController()
+        {
+            Task.Run(() => backwork());
+        }
+
+        private async void backwork()
+        {
+            MessageQueue queue;
+            if (MessageQueue.Exists(@".\private$\MyNewPrivateQueue"))
+            {
+                queue = new MessageQueue(@".\private$\MyNewPrivateQueue");
+            }
+            else
+            {
+                queue = MessageQueue.Create(".\\private$\\MyNewPrivateQueue");
+            }
+            using (queue)
+            {
+                queue.Formatter = new XmlMessageFormatter(new Type[] {typeof(string)});
+                while (queue.CanRead)
+                {
+                    Message m = queue.Receive();
+                    int r = await deleteentyti(m.Body.ToString());
+                    if (r<0)
+                    {
+                        queue.Send(m);
+                    }
+                }
+            }
+        }
+
+        private async Task<int> deleteentyti(string source)
+        {
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    await test.DeleteAsync(source);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.Error("Error with request DELETE http://localhost:46487/api/DB/ with filters. Error message: {0}", ex.Message);
+
+                return -1;
+            }
+            return 0;
+        }
+
+        private async Task<int> deleteregion(personalinfmodel inf)
+        {
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    await test.DeleteAsync("http://localhost:46487/api/DB/" + inf.Id);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.Error("Error with request DELETE http://localhost:46487/api/DB/ with filters. Error message: {0}", ex.Message);
+
+                return -1;
+            }
+            return 0;
+        }
+
+        private async Task<int> deletecompany(companiesmodel inf)
+        {
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    await test.DeleteAsync("http://localhost:29443/api/DB/" + inf.Id);
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                logger.Error("Error with request DELETE http://localhost:29443/api/DB/ with filters. Error message: {0}", ex.Message);
+
+                return -1;
+            }
+            return 0;
+        }
 
         // GET: api/Gate/companies
         [Route("inf/{service:maxlength(32)}")]
@@ -49,10 +142,10 @@ namespace WebApplication5.Controllers
                             logger.Info("Request  http://localhost:29443/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }
                     }
-                    catch(HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Succsess request from {1} with parametr 'service'= {0}", service, ip);
                     return Ok(CompInfo);
@@ -73,10 +166,10 @@ namespace WebApplication5.Controllers
                             logger.Info("Request  http://localhost:2051/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }
                     }
-                    catch (HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Succsess request from {1} with parametr 'service'= {0}", service, ip);
                     return Ok(WorkersInfo);
@@ -97,10 +190,10 @@ namespace WebApplication5.Controllers
                             logger.Info("Request  http://localhost:46487/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }                        
                     }
-                    catch (HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:46487/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:46487/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Succsess request from {1} with parametr 'service'= {0}", service, ip);
                     return Ok(RegionsInfo);
@@ -134,10 +227,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
-                logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                throw new HttpException(400, "Bad Request");
+                logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                return CompInfo.ToPagedList(pageNumber, pageSize);
             }
             logger.Info("Succsess request from {2} with parametr 'page'= {0} 'pageSize'= {1}", page, pageSize, ip);
             return CompInfo.ToPagedList(pageNumber, pageSize);
@@ -168,10 +261,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
-                logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                throw new HttpException(400, "Bad Request");
+                logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                return CompInfo.ToPagedList(pageNumber, pageSize);
             }
             logger.Info("Succsess request from {2} with parametr 'page'= {0} 'pageSize'= {1}", page, pageSize, ip);
             return CompInfo.ToPagedList(pageNumber, pageSize);
@@ -204,10 +297,10 @@ namespace WebApplication5.Controllers
                             }
                         }
                     }
-                    catch (HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:29443/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Compliete request from {3} with parametr 'service'= {0} 'id'={1}", service, id, ip);
                     return Ok(CompInfo);
@@ -227,10 +320,10 @@ namespace WebApplication5.Controllers
                             }
                         }
                     }
-                    catch (HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:2051/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Compliete request from {3} with parametr 'service'= {0} 'id'={1}", service, id, ip);
                     return Ok(WorkersInfo);
@@ -250,10 +343,10 @@ namespace WebApplication5.Controllers
                             }
                         }
                     }
-                    catch (HttpException ex)
+                    catch (HttpRequestException ex)
                     {
-                        logger.Error("Error with request http://localhost:46487/api/DB Answer status = {0} and Reason = {1}", ex.WebEventCode, ex.Message);
-                        return StatusCode(HttpStatusCode.BadGateway);
+                        logger.Error("Error with request http://localhost:46487/api/DB Answer status = {0} and Reason = {1}", ex.InnerException, ex.Message);
+                        return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
                     }
                     logger.Info("Compliete request from {3} with parametr 'service'= {0} 'id'={1}", service, id, ip);
                     return Ok(RegionsInfo);
@@ -301,12 +394,16 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:29443/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
             logger.Info("Success compliete request GET from {3} with parametrs 'Name'= {0} 'CEO'= {1} 'region'= {2}", company.Name, company.CEO, company.region, ip);
+            if (CompInfo == null)
+            {
+                return Ok("[]");
+            }
             return Ok(CompInfo);
         }
 
@@ -354,10 +451,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:2051/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
             logger.Info("Success compliete request GET from {4} with parametrs 'FIO'= {0} 'Company'= {1} 'Cost'= {2} 'RegionOffice'= {3}", worker.FIO, worker.Company, worker.Cost, worker.RegionOffice, ip);
             return Ok(WorkInfo);
@@ -381,7 +478,7 @@ namespace WebApplication5.Controllers
             else
             {
                 logger.Warn("Request GET from {1} with parametr 'CompanyName'= {0} aborted by parameters", CompanyName, ip);
-                return StatusCode(HttpStatusCode.BadRequest);
+                return Content(HttpStatusCode.BadRequest, "Bad DATA AAAAAAAA. Many companies. But need one company.");
             }
 
             List<WebApplication5.Models.workermodel> WorkInfo = new List<WebApplication5.Models.workermodel>();
@@ -402,10 +499,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:29443/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             try
@@ -425,10 +522,18 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:2051/odata/CompInfwith?$filter=Company eq {0} Error message: {1}", CompInfo.Id, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                WebApplication5.Models.detailedworkermodel temp = new WebApplication5.Models.detailedworkermodel();
+                temp.FIO = string.Empty;
+                temp.Cost = 0;
+                temp.Name = CompInfo.Name;
+                temp.CEO = CompInfo.CEO;
+                temp.region = CompInfo.region;
+                temp.RegionOffice = 0;
+                logger.Info("DEGRADATE compliete request GET from {1} with parametr 'CompanyName'= {0}", CompanyName, ip);
+                return Ok(temp);
             }
 
             List<WebApplication5.Models.detailedworkermodel> DWorkInfo = new List<WebApplication5.Models.detailedworkermodel>();
@@ -481,10 +586,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch(HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:46487/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
             logger.Info("Success compliete request GET from {1} with parametr 'region'= {0}", region, ip);
             return Ok(CompInfo);
@@ -522,7 +627,7 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Warn("Error GET http://localhost:46487/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
                 return CompInfo.ToPagedList(pageNumber, pageSize);
@@ -545,7 +650,7 @@ namespace WebApplication5.Controllers
             if ((baseinf.CEO == null) || (baseinf.Cost == 0) || (baseinf.Name == null) || (baseinf.region == null))
             {
                 logger.Warn("ABORTED POST from {4} with parametrs 'CEO'= {0}, 'Name'= {1}, 'Cost'= {2}, 'region'= {3}. Invalid parametrs.", baseinf.CEO, baseinf.Name, baseinf.Cost, baseinf.region, ip);
-                return StatusCode(HttpStatusCode.BadRequest);
+                return Content(HttpStatusCode.BadRequest, "Bad DATA AAAAAAAA.");
             }
 
             WebApplication5.Models.personalinfmodel regID = new Models.personalinfmodel();
@@ -554,6 +659,7 @@ namespace WebApplication5.Controllers
             WebApplication5.Models.companiesmodel buf = new Models.companiesmodel();
             WebApplication5.Models.workermodel buf2_t = new Models.workermodel();
             WebApplication5.Models.workermodel buf2 = new Models.workermodel();
+            bool flag = true;
             
             buf.CEO = baseinf.CEO;
             buf.Name = baseinf.Name;
@@ -582,10 +688,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch(HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request GET http://localhost:46487/odata/CompInf?$filter=claster eq '{0}' . Error message: {1}", regID.claster, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             try
@@ -607,12 +713,13 @@ namespace WebApplication5.Controllers
                 else
                 {
                     regID = regIDbuf;
+                    flag = false;
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request POST http://localhost:46487/api/DB. Error message: {0}", ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             buf.region = regID.Id;
@@ -635,10 +742,15 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request GET http://localhost:29443/odata/CompInf with filters. Error message: {0}", ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                if (flag)
+                    if (deleteregion(regID).Result < 0)
+                    {
+                        return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                    }
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             try
@@ -662,10 +774,15 @@ namespace WebApplication5.Controllers
                     buf = buf_t;
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request POST http://localhost:29443/api/DB. Error message: {0}", ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                if (flag)
+                    if (deleteregion(regID).Result < 0)
+                    {
+                        return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                    }
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             buf2.Company = buf.Id;
@@ -689,10 +806,19 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request GET http://localhost:2051/odata/CompInf with filters. Error message: {1}", regID.claster, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                if (flag)
+                    if (deleteregion(regID).Result < 0)
+                    {
+                        return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                    }
+                if (deletecompany(buf).Result < 0)
+                {
+                    return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                }
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             try
@@ -716,10 +842,19 @@ namespace WebApplication5.Controllers
                     buf2 = buf2_t;
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request POST http://localhost:2051/api/DB . Error message: {0}", ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                if (flag)
+                    if (deleteregion(regID).Result < 0)
+                    {
+                        return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                    }
+                if (deletecompany(buf).Result < 0)
+                {
+                    return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                }
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             logger.Info("Success compliete request POST from {4} with parametrs 'CEO'= {0}, 'Name'= {1}, 'Cost'= {2}, 'region'= {3}", baseinf.CEO, baseinf.Name, baseinf.Cost, baseinf.region, ip);
@@ -739,7 +874,7 @@ namespace WebApplication5.Controllers
             if ((value.CEO == null) || (value.Name == null) || (value.region == 0))
             {
                 logger.Warn("ABORTED PUT from {4} with parametrs 'ID'= {0}, 'CEO'= {1}, 'Name'= {2}, 'region'= {3}. Invalid parametrs.", id, value.CEO, value.Name, value.region, ip);
-                return StatusCode(HttpStatusCode.BadRequest);
+                return Content(HttpStatusCode.BadRequest, "Bad DATA AAAAAAAA.");
             }
 
             try
@@ -750,10 +885,10 @@ namespace WebApplication5.Controllers
                     await test.PutAsJsonAsync("http://localhost:29443/api/DB/" + id.ToString(), value);
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request PUT http://localhost:29443/api/DB + {4}. Parametrs 'ID'= {0}, 'CEO'= {1}, 'Name'= {2}, 'region'= {3}. Error message: {5}", id, value.CEO, value.Name, value.region, id.ToString(), ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             logger.Info("Success compliete PUT from {4}. Parametrs 'ID'= {0}, 'CEO'= {1}, 'Name'= {2}, 'region'= {3}.", id, value.CEO, value.Name, value.region, ip);
@@ -763,13 +898,14 @@ namespace WebApplication5.Controllers
         // DELETE: api/Gate/5
         [Route("~companies/delete/{companyname:maxlength(32)=_}")]
         public async Task<IHttpActionResult> Delete([FromUri] string companyname)
-        {
+        {            
 #if(DEBUG==true)
             int ip = 0;
 #else
             var ip = Request.GetOwinContext().Request.RemoteIpAddress;
 #endif
             logger.Info("Request DELETE from {1} with parametr 'Name'= {0}", companyname, ip);
+            var queue = new MessageQueue(@".\private$\MyNewPrivateQueue");
             string requeststr = "";
             if (!(companyname == "_"))
             {
@@ -778,7 +914,7 @@ namespace WebApplication5.Controllers
             else
             {
                 logger.Info("Request DELETE from {1} with parametr 'Name'= {0} CANCELED by fitler. Bad parametr value.", companyname, ip);
-                return StatusCode(HttpStatusCode.BadRequest);
+                return Content(HttpStatusCode.BadRequest, "Bad DATA AAAAAAAA.");
             }
 
             List<WebApplication5.Models.workermodel> WorkInfo = new List<WebApplication5.Models.workermodel>();
@@ -799,16 +935,16 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request GET http://localhost:29443/odata/CompInf + {0}. Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             if (CompInfo == null)
             {
                 logger.Warn("Aborted DELETE from {1} with parametr 'Name'= {0}. No such company.", companyname, ip);
-                return StatusCode(HttpStatusCode.Conflict);
+                return Content(HttpStatusCode.Conflict, "Company in invalid");
             }
 
             try
@@ -817,18 +953,14 @@ namespace WebApplication5.Controllers
                 {
                     test.BaseAddress = new Uri("http://localhost:29443/");
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.DeleteAsync("api/DB/" + CompInfo.Id);
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        logger.Info("DELETE COMPANY RESPONSE: {0}", EmpResponse);
-                    }
+                    await test.DeleteAsync("api/DB/" + CompInfo.Id);                    
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request DELETE http://localhost:29443/api/DB/ . Error message: {1}", requeststr, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                queue.Send("http://localhost:29443/api/DB/" + CompInfo.Id);
+                return Content(HttpStatusCode.OK, "Error in system. Sorry.");
             }
 
             try
@@ -847,10 +979,10 @@ namespace WebApplication5.Controllers
                     }
                 }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request GET http://localhost:2051/odata/CompInf?$filter=Company eq  + {0}. Error message: {1}", CompInfo.Id, ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
 
             try
@@ -859,18 +991,15 @@ namespace WebApplication5.Controllers
                     using (HttpClient test = new HttpClient())
                     {
                         test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage res = await test.DeleteAsync("http://localhost:2051/api/DB/" + t.Id);
-                        if (res.IsSuccessStatusCode)
-                        {
-                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                            logger.Info("DELETE WORKER RESPONSE: {0}", EmpResponse);
-                        }
+                        await test.DeleteAsync("http://localhost:2051/api/DB/" + t.Id);                        
                     }
             }
-            catch (HttpException ex)
+            catch (HttpRequestException ex)
             {
                 logger.Error("Error with request DELETE http://localhost:2051/api/DB/. Error message: {0}",ex.Message);
-                return StatusCode(HttpStatusCode.BadGateway);
+                foreach (var t in WorkInfo)
+                    queue.Send("http://localhost:2051/api/DB/" + t.Id.ToString());
+                return Content(HttpStatusCode.OK, "Error in system. Sorry.");
             }
 
             logger.Info("Success compliete DELETE from {1} with parametr 'Name'= {0}", companyname, ip);
