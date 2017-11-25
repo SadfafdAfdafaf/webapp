@@ -402,7 +402,7 @@ namespace WebApplication5.Controllers
             logger.Info("Success compliete request GET from {3} with parametrs 'Name'= {0} 'CEO'= {1} 'region'= {2}", company.Name, company.CEO, company.region, ip);
             if (CompInfo == null)
             {
-                return Ok("[]");
+                return Ok("");
             }
             return Ok(CompInfo);
         }

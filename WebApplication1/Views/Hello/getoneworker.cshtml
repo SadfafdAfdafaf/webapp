@@ -1,0 +1,48 @@
+﻿@model WebApplication1.Models.workermodel
+
+@{
+    ViewBag.Title = "getoneworker";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>getoneworker</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FIO)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Company)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Cost)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.RegionOffice)
+        </th>
+        <th></th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.Id)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.FIO)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.Company)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.Cost)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.RegionOffice)
+        </td>
+    </tr>
+
+</table>

@@ -292,10 +292,21 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Hello\hello.cshtml" />
     <Content Include="Views\Hello\getworkers.cshtml" />
-    <Content Include="Views\Hello\lab2.cshtml" />
+    <Content Include="Views\Hello\lab4.cshtml">
+      <BrowseToURL>~/Hello/lab4</BrowseToURL>
+    </Content>
     <Content Include="Views\Hello\getsomeworkers.cshtml" />
     <Content Include="Views\Hello\deletecompany.cshtml" />
     <Content Include="Views\Hello\getworkerspage.cshtml" />
+    <Content Include="Views\Hello\getregionbyid.cshtml" />
+    <Content Include="Views\Hello\getcompaniespage.cshtml" />
+    <Content Include="Views\Hello\getcompanybyname.cshtml" />
+    <Content Include="Views\Hello\getfilteredworkers.cshtml" />
+    <Content Include="Views\Hello\getonecompany.cshtml" />
+    <Content Include="Views\Hello\getoneworker.cshtml" />
+    <Content Include="Views\Hello\addcompany.cshtml" />
+    <Content Include="Views\Hello\editcompany.cshtml" />
+    <Content Include="Views\Hello\getregionspage.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

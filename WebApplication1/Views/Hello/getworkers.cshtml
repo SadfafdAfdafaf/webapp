@@ -1,25 +1,19 @@
-﻿@model IEnumerable<WebApplication1.Models.workermodel>
+﻿@model IEnumerable<WebApplication1.Models.personalinfmodel>
 
 @{
-    ViewBag.Title = "workers";
+    ViewBag.Title = "regions";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>workers</h2>
+<h2>REGIONS</h2>
 
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.FIO)
+            @Html.DisplayNameFor(model => model.Id)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.Company)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Cost)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.RegionOffice)
+            @Html.DisplayNameFor(model => model.claster)
         </th>
         <th></th>
     </tr>
@@ -28,17 +22,11 @@
     {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.FIO)
+                @Html.DisplayFor(modelItem => item.Id)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Company)
+                @Html.DisplayFor(modelItem => item.claster)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cost)
-            </td>
-            <th>
-                @Html.DisplayFor(modelItem => item.RegionOffice)
-            </th>
         </tr>
     }
 

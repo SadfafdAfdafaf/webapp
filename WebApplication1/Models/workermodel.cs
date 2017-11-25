@@ -41,13 +41,10 @@ namespace WebApplication1.Models
     }
 
     public class detailedCEOmodel
-    {        
+    {
         public string Name { get; set; }
         public string CEO { get; set; }
         public string region { get; set; }
-        public string FIO { get; set; }
         public int Cost { get; set; }
-        public string RegionOffice { get; set; }
-
     }
 }

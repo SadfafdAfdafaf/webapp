@@ -20,7 +20,7 @@ namespace WebApplication1.Controllers
             return View("Index");
         }
 
-        public ActionResult lab2()
+        public ActionResult lab4()
         {
 
             return View();
@@ -30,18 +30,19 @@ namespace WebApplication1.Controllers
 
         public async Task<ActionResult> getworkers()
         {
-            List<WebApplication1.Models.workermodel> EmpInfo = new List<WebApplication1.Models.workermodel>();
+            List<WebApplication1.Models.personalinfmodel> EmpInfo = new List<WebApplication1.Models.personalinfmodel>();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:2051/api/DB"));
+                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:56454/api/gate/inf/regions"));
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.workermodel>>(EmpResponse);
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.personalinfmodel>>(sss);
                     }
                 }
             }
@@ -52,15 +53,69 @@ namespace WebApplication1.Controllers
             return View(EmpInfo);
         }
 
-        public async Task<ActionResult> getworkerspage(int? page)
+        public async Task<ActionResult> getregionbyid(int region_number)
         {
+            WebApplication1.Models.personalinfmodel EmpInfo = new WebApplication1.Models.personalinfmodel();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:56454/api/gate/inf/regions/" + region_number.ToString()));
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.personalinfmodel>(sss);
+                    }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            return View(EmpInfo);
+        }
+        //когда ничего не нашло возвращается пустая коллекция
+        public async Task<ActionResult> getcompanybyname(string company_name)
+        {
+            WebApplication1.Models.companiesmodel CompInfo = new WebApplication1.Models.companiesmodel();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + company_name);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(sss);
+                    }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            return View(CompInfo);
+        }
+
+        public async Task<ActionResult> getworkerspage(int? page, int pageSize=3)
+        {
+            if (pageSize <= 0)
+                pageSize = 3;
             List<WebApplication1.Models.workermodel> EmpInfo = new List<WebApplication1.Models.workermodel>();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:2051/api/DB"));
+                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:56454/api/gate/~workers/all/page/" + page.ToString() + "/" + pageSize.ToString()));
 
                     if (res.IsSuccessStatusCode)
                     {
@@ -73,28 +128,80 @@ namespace WebApplication1.Controllers
                 throw new HttpException(400, "Bad Request");
             }
 
-            int pageSize = 3;
-            int pageNumber = (page ?? 1);
+            ///int pageNumber = (page ?? 1);
+            int pageNumber = 1;
             return View(EmpInfo.ToPagedList(pageNumber, pageSize));
         }
 
-        public async Task<ActionResult> getsomeworkers()
+        public async Task<ActionResult> getcompaniespage(int? page, int pageSize = 3)
         {
-            List<WebApplication1.Models.workermodel> WorkInfo = new List<WebApplication1.Models.workermodel>();
+            if (pageSize<=0)
+                pageSize = 3;
+
+            List<WebApplication1.Models.companiesmodel> EmpInfo = new List<WebApplication1.Models.companiesmodel>();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:56454/api/gate/~companies/all/page/" + page.ToString() + "/" + pageSize.ToString()));
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.companiesmodel>>(EmpResponse);
+                    }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            ///int pageNumber = (page ?? 1);
+            int pageNumber = 1;
+            return View(EmpInfo.ToPagedList(pageNumber, pageSize));
+        }
+
+        public async Task<ActionResult> getfilteredworkers(string company_name)
+        {
+            List<WebApplication1.Models.detailedworkermodel> WorkInfo = new List<WebApplication1.Models.detailedworkermodel>();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~workers/" + company_name);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.detailedworkermodel>>(EmpResponse);
+                    }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            return View(WorkInfo);
+        }
+
+
+        public async Task<ActionResult> getonecompany(string company_name, string ceo_name, int region_id)
+        {
             WebApplication1.Models.companiesmodel CompInfo = new WebApplication1.Models.companiesmodel();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
-                    test.BaseAddress = new Uri("http://localhost:29443/");
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=Name eq 'Microsort'");
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + company_name + "/" + ceo_name + "/" + region_id.ToString());
 
                     if (res.IsSuccessStatusCode)
                     {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;                        
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
                     }
                 }
@@ -104,65 +211,28 @@ namespace WebApplication1.Controllers
                 throw new HttpException(400, "Bad Request");
             }
 
-            try
-            {
-                using (HttpClient test = new HttpClient())
-                {
-                    test.BaseAddress = new Uri("http://localhost:2051/");
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=Company eq " + CompInfo.Id.ToString());
-
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
-                        WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.workermodel>>(EmpResponse);
-                    }
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-
-            List<WebApplication1.Models.detailedworkermodel> DWorkInfo = new List<WebApplication1.Models.detailedworkermodel>();
-
-            foreach (var t in WorkInfo)
-            {
-                WebApplication1.Models.detailedworkermodel temp = new Models.detailedworkermodel();
-
-                temp.FIO = t.FIO;
-                temp.Cost = t.Cost;
-                temp.Name = CompInfo.Name;
-                temp.CEO = CompInfo.CEO;
-                temp.region = CompInfo.region;
-                temp.RegionOffice = t.RegionOffice;
-
-                DWorkInfo.Add(temp);
-            }
-
-            return View(DWorkInfo);
+            return View(CompInfo);
         }
 
-        public async Task<ActionResult> deletecompany()
+
+
+        public async Task<ActionResult> getregionspage(int? page, int pageSize = 3)
         {
-            List<WebApplication1.Models.workermodel> WorkInfo = new List<WebApplication1.Models.workermodel>();
-            WebApplication1.Models.companiesmodel CompInfo = new WebApplication1.Models.companiesmodel();
+            if (pageSize<=0)
+                pageSize = 3;
+
+            List<WebApplication1.Models.personalinfmodel> EmpInfo = new List<WebApplication1.Models.personalinfmodel>();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
-                    test.BaseAddress = new Uri("http://localhost:29443/");
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=Name eq 'Microsort'");
+                    HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:56454/api/gate/~regions/_/page/" + page.ToString() + "/" + pageSize.ToString()));
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
-                        CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
+                        EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.personalinfmodel>>(EmpResponse);
                     }
                 }
             }
@@ -171,34 +241,26 @@ namespace WebApplication1.Controllers
                 throw new HttpException(400, "Bad Request");
             }
 
-            try
-            {
-                using (HttpClient test = new HttpClient())
-                {
-                    test.BaseAddress = new Uri("http://localhost:29443/");
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.DeleteAsync("api/DB/" + CompInfo.Id);
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
+            ///int pageNumber = (page ?? 1);
+            int pageNumber = 1;
+            return View(EmpInfo.ToPagedList(pageNumber, pageSize));
+        }
 
+        public async Task<ActionResult> getoneworker(string worker_name, int compay_id, int cost, int region_id)
+        {
+            WebApplication1.Models.workermodel CompInfo = new WebApplication1.Models.workermodel();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
-                    test.BaseAddress = new Uri("http://localhost:2051/");
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=Company eq " + CompInfo.Id.ToString());
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + worker_name + "/" + compay_id + "/" +
+                        cost .ToString() + "/" + region_id.ToString());
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
-                        WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.workermodel>>(EmpResponse);
+                        CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.workermodel>(EmpResponse);
                     }
                 }
             }
@@ -207,15 +269,82 @@ namespace WebApplication1.Controllers
                 throw new HttpException(400, "Bad Request");
             }
 
+            return View(CompInfo);
+        }
+
+        public async Task<ActionResult> addcompany(WebApplication1.Models.detailedCEOmodel aaaasssss)
+        {
             try
             {
-                foreach (var t in WorkInfo)
-                    using (HttpClient test = new HttpClient())
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/~companies/add", aaaasssss);
+
+                    if (res.IsSuccessStatusCode)
                     {
-                        test.BaseAddress = new Uri("http://localhost:2051/");
-                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        await test.DeleteAsync("api/DB/" + t.Id);
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;                        
                     }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            return View();
+        }
+
+        
+        public async Task<ActionResult> deletecompany(string company_name)
+        {
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.DeleteAsync("http://localhost:56454/api/gate/~companies/delete/" + company_name);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                    }
+                }
+            }
+            catch
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            
+            return View();
+        }
+
+        public async Task<ActionResult> editcompany(int company_id, string company_name, string company_ceo, int company_region_id)
+        {
+            WebApplication1.Models.companiesmodel asadsad = new Models.companiesmodel();
+            asadsad.Name = company_name;
+            asadsad.CEO = company_ceo;
+            asadsad.region = company_region_id;
+            asadsad.Id = company_id;
+
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.PutAsJsonAsync("http://localhost:56454/api/gate/~companies/edit/" + company_id.ToString(), asadsad);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                    }
+                }
             }
             catch
             {
@@ -225,179 +354,6 @@ namespace WebApplication1.Controllers
 
             return View();
         }
-
-        public async Task<ActionResult> addcompany()
-        {
-            string region = "UA7";
-            WebApplication1.Models.personalinfmodel regID = new Models.personalinfmodel();
-            WebApplication1.Models.personalinfmodel regIDbuf = new Models.personalinfmodel();
-            regID.claster = region;
-            WebApplication1.Models.companiesmodel buf_t = new Models.companiesmodel();
-            WebApplication1.Models.companiesmodel buf = new Models.companiesmodel();
-            buf.CEO = "Meme JD";
-            buf.Name = "Microsoft";
-            buf.region = 0;
-            WebApplication1.Models.workermodel buf2_t = new Models.workermodel();
-            WebApplication1.Models.workermodel buf2 = new Models.workermodel();
-            buf2.Company = 0;
-            buf2.Cost = 450;
-            buf2.FIO = buf.CEO;
-            buf2.RegionOffice = 0;
-
-            try
-            {
-                using (HttpClient test = new HttpClient())
-                {
-                    test.BaseAddress = new Uri("http://localhost:46487/");
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=claster eq '" + regID.claster + "'");
-
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
-                        regIDbuf = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.personalinfmodel>(EmpResponse);
-                    }
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-
-            try
-            {
-                if (regIDbuf == null)
-                {
-                    using (HttpClient test = new HttpClient())
-                    {
-                        test.BaseAddress = new Uri("http://localhost:46487/");
-                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage res = await test.PostAsJsonAsync("api/DB", regID);
-
-                        if (res.IsSuccessStatusCode)
-                        {
-                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                            regID = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.personalinfmodel>(EmpResponse);
-                        }
-                    }
-                }
-                else
-                {
-                    regID = regIDbuf;
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-                                    
-            buf.region = regID.Id;
-
-            try
-            {
-                using (HttpClient test = new HttpClient())
-                {
-                    test.BaseAddress = new Uri("http://localhost:29443/");
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=region eq " + buf.region + " and " +
-                        "CEO eq '" + buf.CEO + "' and Name eq '" + buf.Name + "'");
-
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
-                        buf_t = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
-                    }
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-
-            try
-            {
-                if (buf_t == null)
-                {
-                    using (HttpClient test = new HttpClient())
-                    {
-                        test.BaseAddress = new Uri("http://localhost:29443/");
-                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage res = await test.PostAsJsonAsync("api/DB", buf);
-
-                        if (res.IsSuccessStatusCode)
-                        {
-                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                            buf = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
-                        }
-                    }
-                }
-                else
-                {
-                    buf = buf_t;
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-
-            buf2.Company = buf.Id;
-            buf2.RegionOffice = regID.Id;
-
-            try
-            {
-                using (HttpClient test = new HttpClient())
-                {
-                    test.BaseAddress = new Uri("http://localhost:2051/");
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=FIO eq '" + buf2.FIO + "' and " +
-                        "Cost eq " + buf2.Cost + " and RegionOffice eq " + buf2.RegionOffice + " and Company eq " + buf2.Company);
-
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
-                        buf2_t = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.workermodel>(EmpResponse);
-                    }
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-
-            try
-            {
-                if (buf2_t == null)
-                {
-                    using (HttpClient test = new HttpClient())
-                    {
-                        test.BaseAddress = new Uri("http://localhost:2051/");
-                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        HttpResponseMessage res = await test.PostAsJsonAsync("api/DB", buf2);
-
-                        if (res.IsSuccessStatusCode)
-                        {
-                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                            buf2 = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.workermodel>(EmpResponse);
-                        }
-                    }
-                }
-                else
-                {
-                    buf2 = buf2_t;
-                }
-            }
-            catch
-            {
-                throw new HttpException(400, "Bad Request");
-            }
-            return View();
-        }
+        
 	}
 }

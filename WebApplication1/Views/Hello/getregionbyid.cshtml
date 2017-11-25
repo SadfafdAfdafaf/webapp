@@ -1,0 +1,30 @@
+﻿@model WebApplication1.Models.personalinfmodel
+
+@{
+    ViewBag.Title = "getregionbyid";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>getregionbyid</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.claster)
+        </th>
+        <th></th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.Id)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => modelItem.claster)
+        </td>
+    </tr>    
+
+</table>

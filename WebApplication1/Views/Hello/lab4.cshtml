@@ -1,0 +1,179 @@
+﻿@model WebApplication1.Models.detailedCEOmodel
+
+@{
+    ViewBag.Title = "lab4";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .H1 {
+        border: 4px double #333; /* Рамка вокруг таблицы */
+        border-collapse: separate; /* Способ отображения границы */
+        width: 100%; /* Ширина таблицы */
+        border-spacing: 3px 7px; /* Расстояние между ячейками */
+    }
+
+    td {
+        padding: 5px; /* Поля вокруг текста */
+        border: 1px solid #a52a2a; /* Граница вокруг ячеек */
+    }
+</style>
+
+
+
+<h2>lab4</h2>
+
+<div>
+    <text>Таблица примеров запросов</text>
+    <table class="H1">
+        <thead>
+            <tr>
+                <td>
+                    Описание запроса
+                </td>
+                <td>
+                    Кнопка
+                </td>
+            </tr>
+        </thead>
+        <tbody class="H2">
+            <tr>
+                <td>
+                    Получить список регионов
+                </td>
+                <td>
+                    @Html.ActionLink(">>", "getworkers")
+                </td>
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getregionbyid", "hello"))
+                {
+                    <td>
+                        Получить информацию по региону № <input required name="region_number" type="number" min=1 value=1>
+                    
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getcompanybyname", "hello"))
+                {
+                    <td>
+                        Получить информацию по компании с именем <input name="company_name" type="text">
+
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getworkerspage", "hello"))
+                {
+                    <td>
+                        Страница <input required name="page" type="number" min=1 value=1> списка работников. По <input name="pageSize" type="number" min=1 value=3> элементов на странице.
+
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getcompaniespage", "hello"))
+                {
+                    <td>
+                        Страница <input required name="page" type="number" min=1 value=1> списка компаний. По <input name="pageSize" type="number" min=1 value=3> элементов на странице.
+
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getfilteredworkers", "hello"))
+                {
+                    <td>
+                        Работники конкретной компании <input name="company_name" type="text">
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getonecompany", "hello"))
+                {
+                    <td>
+                        Информация по компании с именем <input required name="company_name" type="text"> и СЕО <input name="ceo_name" type="text"> и Region ID <input name="region_id" type="number" min=0 value=0>
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getoneworker", "hello"))
+                {
+                    <td>
+                        Информация по работнику с именем <input required name="worker_name" type="text"> и Compay ID <input name="compay_id" type="number" min=0 value=0> и COST <input name="cost" type="number" min=0 value=0> и Region ID <input name="region_id" type="number" min=0 value=0>
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("getregionspage", "hello"))
+                {
+                    <td>
+                        Страница <input required name="page" type="number" min=1 value=1> списка регионов. По <input name="pageSize" type="number" min=1 value=3> элементов на странице.
+
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("addcompany", "hello"))
+                {                    
+                    <td>
+                        Добавление компании с название @Html.TextBoxFor(x => x.Name) именем CEO @Html.TextBoxFor(x => x.CEO)
+                         название региона головного офиса @Html.TextBoxFor(x => x.region) и зарплатой СЕО @Html.TextBoxFor(x => x.Cost, new { type = "number", Value = 0, Min = 0})
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>
+                @using (Html.BeginForm("deletecompany", "hello"))
+                {
+                    <td>
+                        Название компании <input name="company_name" type="text">
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+            <tr>                
+                @using (Html.BeginForm("editcompany", "hello"))
+                {
+
+                    <td>
+                        Изменение компании с название <input name="company_name" type="text"> именем CEO <input name="company_ceo" type="text">
+                        ID региона головного офиса <input name="company_region_id" type="number" min="1" value="1"> и ID <input required name="company_id" type="number" min="1" value="1">
+                    </td>
+                    <td>
+                        <input type="submit">
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>
