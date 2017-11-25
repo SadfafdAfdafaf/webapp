@@ -708,6 +708,10 @@ namespace WebApplication5.Controllers
                             var EmpResponse = res.Content.ReadAsStringAsync().Result;
                             regID = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.personalinfmodel>(EmpResponse);
                         }
+                        else
+                        {
+                            return Content(res.StatusCode, "Bad DATA. AAAAAAAA.");
+                        }
                     }
                 }
                 else
@@ -766,6 +770,15 @@ namespace WebApplication5.Controllers
                         {
                             var EmpResponse = res.Content.ReadAsStringAsync().Result;
                             buf = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.companiesmodel>(EmpResponse);
+                        }
+                        else
+                        {
+                            if (flag)
+                                if (deleteregion(regID).Result < 0)
+                                {
+                                    return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                                }
+                            return Content(res.StatusCode, "Bad DATA. AAAAAAAA.");
                         }
                     }
                 }
@@ -834,6 +847,19 @@ namespace WebApplication5.Controllers
                         {
                             var EmpResponse = res.Content.ReadAsStringAsync().Result;
                             buf2 = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.workermodel>(EmpResponse);
+                        }
+                        else
+                        {
+                            if (flag)
+                                if (deleteregion(regID).Result < 0)
+                                {
+                                    return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                                }
+                            if (deletecompany(buf).Result < 0)
+                            {
+                                return Content((HttpStatusCode)418, "Global system error. Sorry.");
+                            }
+                            return Content(res.StatusCode, "Dab DATA. AAAAA.");
                         }
                     }
                 }
@@ -960,7 +986,7 @@ namespace WebApplication5.Controllers
             {
                 logger.Error("Error with request DELETE http://localhost:29443/api/DB/ . Error message: {1}", requeststr, ex.Message);
                 queue.Send("http://localhost:29443/api/DB/" + CompInfo.Id);
-                return Content(HttpStatusCode.OK, "Error in system. Sorry.");
+                return StatusCode(HttpStatusCode.OK);
             }
 
             try
@@ -999,7 +1025,7 @@ namespace WebApplication5.Controllers
                 logger.Error("Error with request DELETE http://localhost:2051/api/DB/. Error message: {0}",ex.Message);
                 foreach (var t in WorkInfo)
                     queue.Send("http://localhost:2051/api/DB/" + t.Id.ToString());
-                return Content(HttpStatusCode.OK, "Error in system. Sorry.");
+                return StatusCode(HttpStatusCode.OK);
             }
 
             logger.Info("Success compliete DELETE from {1} with parametr 'Name'= {0}", companyname, ip);
