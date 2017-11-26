@@ -5,6 +5,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@Scripts.Render("~/Scripts/myvalidate.js");
+
 <style type="text/css">
     .H1 {
         border: 4px double #333; /* Рамка вокруг таблицы */
@@ -61,7 +63,7 @@
                 @using (Html.BeginForm("getcompanybyname", "hello"))
                 {
                     <td>
-                        Получить информацию по компании с именем <input name="company_name" type="text">
+                        Получить информацию по компании с именем <input name="company_name" type="text" pattern="^[a-zA-Z0-9\.\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
 
                     </td>
                     <td>
@@ -97,7 +99,7 @@
                 @using (Html.BeginForm("getfilteredworkers", "hello"))
                 {
                     <td>
-                        Работники конкретной компании <input name="company_name" type="text">
+                        Работники конкретной компании <input name="company_name" type="text" pattern="^[a-zA-Z0-9\.\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
                     </td>
                     <td>
                         <input type="submit">
@@ -108,7 +110,9 @@
                 @using (Html.BeginForm("getonecompany", "hello"))
                 {
                     <td>
-                        Информация по компании с именем <input required name="company_name" type="text"> и СЕО <input name="ceo_name" type="text"> и Region ID <input name="region_id" type="number" min=0 value=0>
+                        Информация по компании с именем <input required name="company_name" type="text" pattern="^[a-zA-Z0-9\.\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')"> 
+                        и СЕО <input name="ceo_name" type="text" pattern="^[a-zA-Z0-9\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
+                        и Region ID <input name="region_id" type="number" min=0 value=0>
                     </td>
                     <td>
                         <input type="submit">
@@ -119,7 +123,10 @@
                 @using (Html.BeginForm("getoneworker", "hello"))
                 {
                     <td>
-                        Информация по работнику с именем <input required name="worker_name" type="text"> и Compay ID <input name="compay_id" type="number" min=0 value=0> и COST <input name="cost" type="number" min=0 value=0> и Region ID <input name="region_id" type="number" min=0 value=0>
+                        Информация по работнику с именем <input required name="worker_name" type="text" pattern="^[a-zA-Z0-9\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
+                         и Compay ID <input name="compay_id" type="number" min=0 value=0>
+                         и COST <input name="cost" type="number" min=0 value=0>
+                         и Region ID <input name="region_id" type="number" min=0 value=0>
                     </td>
                     <td>
                         <input type="submit">
@@ -142,8 +149,10 @@
                 @using (Html.BeginForm("addcompany", "hello"))
                 {                    
                     <td>
-                        Добавление компании с название @Html.TextBoxFor(x => x.Name) именем CEO @Html.TextBoxFor(x => x.CEO)
-                         название региона головного офиса @Html.TextBoxFor(x => x.region) и зарплатой СЕО @Html.TextBoxFor(x => x.Cost, new { type = "number", Value = 0, Min = 0})
+                        Добавление компании с название @Html.TextBoxFor(x => x.Name, new {pattern=@"^[a-zA-Z0-9\.\s]+$", oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')", oninput="this.setCustomValidity('')" }) 
+                        именем CEO @Html.TextBoxFor(x => x.CEO, new {pattern=@"^[a-zA-Z0-9\s]+$", oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')", oninput="this.setCustomValidity('')"})
+                         название региона головного офиса @Html.TextBoxFor(x => x.region, new {pattern=@"^[a-zA-Z0-9\s]+$", oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')", oninput="this.setCustomValidity('')"}) 
+                        и зарплатой СЕО @Html.TextBoxFor(x => x.Cost, new { type = "number", Value = 0, Min = 0})
                     </td>
                     <td>
                         <input type="submit">
@@ -154,7 +163,7 @@
                 @using (Html.BeginForm("deletecompany", "hello"))
                 {
                     <td>
-                        Название компании <input name="company_name" type="text">
+                        Название компании для удаления <input name="company_name" type="text" pattern="^[a-zA-Z0-9\.\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
                     </td>
                     <td>
                         <input type="submit">
@@ -166,7 +175,8 @@
                 {
 
                     <td>
-                        Изменение компании с название <input name="company_name" type="text"> именем CEO <input name="company_ceo" type="text">
+                        Изменение компании с название <input name="company_name" type="text" pattern="^[a-zA-Z0-9\.\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
+                         именем CEO <input name="company_ceo" type="text" pattern="^[a-zA-Z0-9\s]+$" oninvalid="this.setCustomValidity('Ну нормально вводите. Вы ж четкий пацан.')" oninput="this.setCustomValidity('')">
                         ID региона головного офиса <input name="company_region_id" type="number" min="1" value="1"> и ID <input required name="company_id" type="number" min="1" value="1">
                     </td>
                     <td>

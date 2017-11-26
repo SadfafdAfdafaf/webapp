@@ -44,11 +44,18 @@ namespace WebApplication1.Controllers
                         var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
                         EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.personalinfmodel>>(sss);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
-            catch (HttpException e)
+            catch
             {
-                throw new HttpException(400, "Bad Request", e);
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
             return View(EmpInfo);
         }
@@ -69,11 +76,18 @@ namespace WebApplication1.Controllers
                         var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
                         EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.personalinfmodel>(sss);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View(EmpInfo);
@@ -92,14 +106,20 @@ namespace WebApplication1.Controllers
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
+                    }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
-                        CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(sss);
+                        return View("sorry", (object)sss);
                     }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View(CompInfo);
@@ -122,10 +142,18 @@ namespace WebApplication1.Controllers
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.workermodel>>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
-            catch{
-                throw new HttpException(400, "Bad Request");
+            catch
+            {
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             ///int pageNumber = (page ?? 1);
@@ -151,11 +179,18 @@ namespace WebApplication1.Controllers
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.companiesmodel>>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             ///int pageNumber = (page ?? 1);
@@ -178,37 +213,70 @@ namespace WebApplication1.Controllers
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.detailedworkermodel>>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View(WorkInfo);
         }
 
 
-        public async Task<ActionResult> getonecompany(string company_name, string ceo_name, int region_id)
+        public async Task<ActionResult> getonecompany(string company_name, string ceo_name, int region_id = 0)
         {
+            string req = "";
+            if (ceo_name != "")
+            {
+                req += "/" + ceo_name;
+            }
+            else
+            {
+                req += "/_";
+            }
+            if (region_id != 0)
+            {
+                req += "/" + region_id.ToString();
+            }
+            else
+            {
+                req += "/0";
+            }
+
+
             WebApplication1.Models.companiesmodel CompInfo = new WebApplication1.Models.companiesmodel();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + company_name + "/" + ceo_name + "/" + region_id.ToString());
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + company_name + req);
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;                        
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.companiesmodel>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View(CompInfo);
@@ -234,11 +302,18 @@ namespace WebApplication1.Controllers
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         EmpInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication1.Models.personalinfmodel>>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             ///int pageNumber = (page ?? 1);
@@ -246,27 +321,59 @@ namespace WebApplication1.Controllers
             return View(EmpInfo.ToPagedList(pageNumber, pageSize));
         }
 
-        public async Task<ActionResult> getoneworker(string worker_name, int compay_id, int cost, int region_id)
+        public async Task<ActionResult> getoneworker(string worker_name, int compay_id = 0, int cost = 0, int region_id = 0)
         {
+            string req = "";
+            if (compay_id != 0)
+            {
+                req += "/" + compay_id;
+            }
+            else
+            {
+                req += "/0";
+            }
+            if (cost != 0)
+            {
+                req += "/" + cost.ToString();
+            }
+            else
+            {
+                req += "/0";
+            }
+            if (region_id != 0)
+            {
+                req += "/" + region_id.ToString();
+            }
+            else
+            {
+                req += "/0";
+            }
+
             WebApplication1.Models.workermodel CompInfo = new WebApplication1.Models.workermodel();
             try
             {
                 using (HttpClient test = new HttpClient())
                 {
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~companies/" + worker_name + "/" + compay_id + "/" +
-                        cost .ToString() + "/" + region_id.ToString());
+                    HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/~workers/" + worker_name + req);
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.workermodel>(EmpResponse);
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View(CompInfo);
@@ -285,11 +392,18 @@ namespace WebApplication1.Controllers
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;                        
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             return View();
@@ -309,11 +423,18 @@ namespace WebApplication1.Controllers
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
             
@@ -344,11 +465,18 @@ namespace WebApplication1.Controllers
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                     }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
             catch
             {
-                throw new HttpException(400, "Bad Request");
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
             }
 
 

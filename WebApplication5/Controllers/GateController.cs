@@ -402,7 +402,7 @@ namespace WebApplication5.Controllers
             logger.Info("Success compliete request GET from {3} with parametrs 'Name'= {0} 'CEO'= {1} 'region'= {2}", company.Name, company.CEO, company.region, ip);
             if (CompInfo == null)
             {
-                return Ok("");
+                return Ok();
             }
             return Ok(CompInfo);
         }
@@ -434,7 +434,7 @@ namespace WebApplication5.Controllers
             {
                 requeststr = requeststr + " and RegionOffice eq " + worker.RegionOffice;
             }
-            string WorkInfo = "";
+            workermodel WorkInfo = new workermodel();
             try
             {
                 using (HttpClient test = new HttpClient())
@@ -445,9 +445,9 @@ namespace WebApplication5.Controllers
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
-                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
-                        WorkInfo = EmpResponse;
+                        EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
+                        EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
+                        WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject < workermodel > (EmpResponse);
                     }
                 }
             }
@@ -456,6 +456,12 @@ namespace WebApplication5.Controllers
                 logger.Warn("Error GET http://localhost:2051/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
                 return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
             }
+
+            if (WorkInfo == null)
+            {
+                return Content(HttpStatusCode.BadRequest, "Worker is not found.");
+            }
+
             logger.Info("Success compliete request GET from {4} with parametrs 'FIO'= {0} 'Company'= {1} 'Cost'= {2} 'RegionOffice'= {3}", worker.FIO, worker.Company, worker.Cost, worker.RegionOffice, ip);
             return Ok(WorkInfo);
         }
@@ -503,6 +509,11 @@ namespace WebApplication5.Controllers
             {
                 logger.Warn("Error GET http://localhost:29443/odata/CompInfwith + {0} Error message: {1}", requeststr, ex.Message);
                 return Content(HttpStatusCode.BadGateway, "Error in system. Sorry.");
+            }
+
+            if (CompInfo == null)
+            {
+                return Content(HttpStatusCode.BadRequest, "Company is not found.");
             }
 
             try
