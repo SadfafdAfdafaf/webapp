@@ -13,6 +13,7 @@ namespace WebApplication1.Controllers
 {
     public class HelloController : Controller
     {
+        string token;
         //
         // GET: /Hello/
         public ActionResult Index()
@@ -26,7 +27,36 @@ namespace WebApplication1.Controllers
             return View();
         }
 
+        // POST: /Account/Login
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Login(WebApplication1.Models.LoginViewModel model, string returnUrl)
+        {
 
+            using (HttpClient test = new HttpClient())
+            {
+                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/login", model);
+
+                if (res.IsSuccessStatusCode)
+                {
+                    var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                    EmpResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                    token = EmpResponse;
+                    HttpContext.Response.Cookies["token_name"].Value = token;
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Invalid username or password.");
+                }
+            }
+
+            // Появление этого сообщения означает наличие ошибки; повторное отображение формы
+            return View(model);
+        }
 
         public async Task<ActionResult> getworkers()
         {
@@ -414,9 +444,15 @@ namespace WebApplication1.Controllers
         {
             try
             {
+                //HttpClientHandler handler = new HttpClientHandler();
+                //handler.UseCookies = true;
+                //handler.CookieContainer = new System.Net.CookieContainer();
+                //handler.CookieContainer.Add(new System.Net.Cookie("token_name", token));
+
                 using (HttpClient test = new HttpClient())
                 {
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Set-Cookie", HttpContext.Request.Cookies["token_name"].Value);
                     HttpResponseMessage res = await test.DeleteAsync("http://localhost:56454/api/gate/~companies/delete/" + company_name);
 
                     if (res.IsSuccessStatusCode)

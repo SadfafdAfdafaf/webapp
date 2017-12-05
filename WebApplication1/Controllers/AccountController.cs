@@ -9,6 +9,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin.Security;
 using WebApplication1.Models;
+using System.Net.Http;
+using System.Net.Http.Headers; 
 
 namespace WebApplication1.Controllers
 {
@@ -36,19 +38,21 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        //
         // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
-        {
-            if (ModelState.IsValid)
+        {              
+                        
+            using (HttpClient test = new HttpClient())
             {
-                var user = await UserManager.FindAsync(model.UserName, model.Password);
-                if (user != null)
+                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/login", model);
+
+                if(res.IsSuccessStatusCode)
                 {
-                    await SignInAsync(user, model.RememberMe);
                     return RedirectToLocal(returnUrl);
                 }
                 else
@@ -56,6 +60,20 @@ namespace WebApplication1.Controllers
                     ModelState.AddModelError("", "Invalid username or password.");
                 }
             }
+
+            //if (ModelState.IsValid)
+            //{
+            //    var user = await UserManager.FindAsync(model.UserName, model.Password);
+            //    if (user != null)
+            //    {
+            //        await SignInAsync(user, model.RememberMe);
+            //        return RedirectToLocal(returnUrl);
+            //    }
+            //    else
+            //    {
+            //        ModelState.AddModelError("", "Invalid username or password.");
+            //    }
+            //}
 
             // Появление этого сообщения означает наличие ошибки; повторное отображение формы
             return View(model);

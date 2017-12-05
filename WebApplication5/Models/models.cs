@@ -48,4 +48,16 @@ namespace WebApplication5.Models
         public int Cost { get; set; }
     }
 
+    public class logpair
+    {
+        public string name { get; set; }
+        public string pass { get; set; }
+    }
+
+    public class LoginViewModel2
+    {
+        public string username { get; set; }
+        public string password { get; set; }
+        public string grant_type { get; set; }
+    }
 }

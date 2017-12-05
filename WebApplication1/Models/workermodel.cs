@@ -47,4 +47,11 @@ namespace WebApplication1.Models
         public string region { get; set; }
         public int Cost { get; set; }
     }
+
+    public class logpair
+    {
+        public string name { get; set; }
+        public string pass { get; set; }
+    }
+
 }

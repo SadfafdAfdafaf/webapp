@@ -113,6 +113,35 @@ namespace WebApplication5.Controllers
             return 0;
         }
 
+        // GET api/gate/login
+        [Route("login")]
+        public async Task<IHttpActionResult> Postlogin([FromBody]LoginViewModel2 mmm)
+        {
+            mmm.grant_type = "password";
+            using (HttpClient test = new HttpClient())
+            {
+                var form = new Dictionary<string, string>  
+               {  
+                   {"grant_type", "password"},  
+                   {"username", mmm.username},  
+                   {"password", mmm.password},  
+               }; 
+                //test.DefaultRequestHeaders.Accept.Clear();
+                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                var loginContent = new FormUrlEncodedContent(form);
+                HttpResponseMessage res = await test.PostAsync("http://localhost:1804/Token", loginContent);
+                if (res.IsSuccessStatusCode)
+                {
+                    var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                    EmpResponse = EmpResponse.Remove(0, 17);
+                    EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(",") - 1, EmpResponse.Length - EmpResponse.IndexOf(",") + 1);
+                    return Ok(EmpResponse);
+                }
+                
+            }
+            return Unauthorized();
+        }
+
         // GET: api/Gate/companies
         [Route("inf/{service:maxlength(32)}")]
         public async Task<IHttpActionResult> Get([FromUri]string service)
@@ -648,6 +677,7 @@ namespace WebApplication5.Controllers
         }
 
         // POST: api/Gate
+        [Authorize]
         [Route("~companies/add")]
         public async Task<IHttpActionResult> Post([FromBody]detailedCEOmodel baseinf)
         {
@@ -899,6 +929,7 @@ namespace WebApplication5.Controllers
         }
 
         // PUT: api/Gate/5
+        [Authorize]
         [Route("~companies/edit/{id:int=1}")]
         public async Task<IHttpActionResult> Put([FromUri] int id, [FromBody]companiesmodel value)
         {
@@ -941,6 +972,19 @@ namespace WebApplication5.Controllers
 #else
             var ip = Request.GetOwinContext().Request.RemoteIpAddress;
 #endif
+            using (HttpClient test = new HttpClient())
+            {
+                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                IEnumerable<string> rawCookies = Request.Headers.GetValues("Set-Cookie");
+                string temp = rawCookies.First();
+                test.DefaultRequestHeaders.Add("Authorization", "Bearer " + temp);
+                HttpResponseMessage res = test.GetAsync("http://localhost:1804/test/token").Result;
+                if(res.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Unauthorized");
+                }
+            }
+
             logger.Info("Request DELETE from {1} with parametr 'Name'= {0}", companyname, ip);
             var queue = new MessageQueue(@".\private$\MyNewPrivateQueue");
             string requeststr = "";
