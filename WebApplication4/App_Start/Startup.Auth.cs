@@ -7,12 +7,14 @@ using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
-using authorization.Providers;
+using WebApplication4.Providers;
 
-namespace authorization
+namespace WebApplication4
 {
     public partial class Startup
     {
+        public const string ExternalCookieAuthenticationType = CookieAuthenticationDefaults.CookiePrefix;
+        public const string ExternalOAuthAuthenticationType = "ExternalToken";
 
         static Startup()
         {
@@ -20,17 +22,21 @@ namespace authorization
 
             UserManagerFactory = () => new UserManager<IdentityUser>(new UserStore<IdentityUser>());
 
+            CookieOptions = new CookieAuthenticationOptions();
+
             OAuthOptions = new OAuthAuthorizationServerOptions
             {
                 TokenEndpointPath = new PathString("/Token"),
                 Provider = new ApplicationOAuthProvider(PublicClientId, UserManagerFactory),
                 AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(2),
+                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
                 AllowInsecureHttp = true
             };
         }
 
         public static OAuthAuthorizationServerOptions OAuthOptions { get; private set; }
+
+        public static CookieAuthenticationOptions CookieOptions { get; private set; }
 
         public static Func<UserManager<IdentityUser>> UserManagerFactory { get; set; }
 
@@ -42,7 +48,7 @@ namespace authorization
             // Enable the application to use a cookie to store information for the signed in user
             // and to use a cookie to temporarily store information about a user logging in with a third party login provider
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
-            app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
+            app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalBearer);
 
             // Включение использования приложением маркера-носителя для проверки подлинности пользователей
             app.UseOAuthBearerTokens(OAuthOptions);

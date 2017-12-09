@@ -84,7 +84,7 @@ namespace WebApplication1.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
-            return View();
+            return Redirect("http://localhost:1804/");
         }
 
         //

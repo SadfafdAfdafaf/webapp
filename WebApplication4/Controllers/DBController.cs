@@ -26,6 +26,7 @@ namespace WebApplication4.Controllers
             base.Dispose(disposing);
         }
 
+        [Authorize]
         [EnableQueryAttribute]
         public IQueryable<personalinf> Get()
         {
@@ -56,6 +57,7 @@ namespace WebApplication4.Controllers
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         // GET api/DB
+        [Authorize]
         public IQueryable<personalinf> Getpersonalinfs()
         {
             logger.Info("Request GET");
@@ -63,6 +65,7 @@ namespace WebApplication4.Controllers
         }
 
         // GET api/DB/5
+        [Authorize]
         [ResponseType(typeof(personalinf))]
         public async Task<IHttpActionResult> Getpersonalinf(int id)
         {
@@ -78,6 +81,7 @@ namespace WebApplication4.Controllers
         }
 
         // PUT api/DB/5
+        [Authorize]
         public async Task<IHttpActionResult> Putpersonalinf(int id, personalinf personalinf)
         {
             logger.Info("Request PUT with ID = {0} claster = {1}", id, personalinf.claster);
@@ -117,6 +121,7 @@ namespace WebApplication4.Controllers
         }
 
         // POST api/DB
+        [Authorize]
         [ResponseType(typeof(personalinf))]
         public async Task<IHttpActionResult> Postpersonalinf(personalinf personalinf)
         {
@@ -136,6 +141,7 @@ namespace WebApplication4.Controllers
         }
 
         // DELETE api/DB/5
+        [Authorize]
         [ResponseType(typeof(personalinf))]
         public async Task<IHttpActionResult> Deletepersonalinf(int id)
         {

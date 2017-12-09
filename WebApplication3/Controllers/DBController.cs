@@ -26,6 +26,7 @@ namespace WebApplication3.Controllers
             base.Dispose(disposing);
         }
 
+        [Authorize]
         [EnableQuery]
         public IQueryable<companies> Get()
         {
@@ -56,6 +57,7 @@ namespace WebApplication3.Controllers
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         // GET api/DB
+        [Authorize]
         public IQueryable<companies> Getcompanies()
         {
             logger.Info("Request GET");
@@ -63,6 +65,7 @@ namespace WebApplication3.Controllers
         }
 
         // GET api/DB/5
+        [Authorize]
         [ResponseType(typeof(companies))]
         public async Task<IHttpActionResult> Getcompanies(int id)
         {
@@ -78,6 +81,7 @@ namespace WebApplication3.Controllers
         }
 
         // PUT api/DB/5
+        [Authorize]
         public async Task<IHttpActionResult> Putcompanies(int id, companies companies)
         {
             logger.Info("Request PUT with ID = {0} Name = {1} CEO = {2} region = {3}", id, companies.Name, companies.CEO, companies.region);
@@ -118,6 +122,7 @@ namespace WebApplication3.Controllers
         }
 
         // POST api/DB
+        [Authorize]
         [ResponseType(typeof(companies))]
         public async Task<IHttpActionResult> Postcompanies(companies companies)
         {
@@ -136,6 +141,7 @@ namespace WebApplication3.Controllers
         }
 
         // DELETE api/DB/5
+        [Authorize]
         [ResponseType(typeof(companies))]
         public async Task<IHttpActionResult> Deletecompanies(int id)
         {

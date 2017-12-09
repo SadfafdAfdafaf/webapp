@@ -309,6 +309,7 @@
     <Content Include="Views\Hello\editcompany.cshtml" />
     <Content Include="Views\Hello\getregionspage.cshtml" />
     <Content Include="Views\Hello\sorry.cshtml" />
+    <Content Include="Views\Hello\Login.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

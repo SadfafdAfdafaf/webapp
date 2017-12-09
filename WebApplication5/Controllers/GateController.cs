@@ -21,7 +21,7 @@ namespace WebApplication5.Controllers
     {
         
         private static Logger logger = LogManager.GetCurrentClassLogger();
-
+        private static string[] tokens = new string[3];
         public GateController()
         {
             Task.Run(() => backwork());
@@ -61,7 +61,28 @@ namespace WebApplication5.Controllers
                 {
 
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.DeleteAsync(source);
+                    string v = source.Substring(0, 23);
+                    switch (v)
+                    {
+                        case "http://localhost:2051/":
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
+                            break;
+                        case "http://localhost:29443/":
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
+                            break;
+                        case "http://localhost:46487/":
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    HttpResponseMessage res = await test.DeleteAsync(source);
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        return -1;
+                    }
                 }
             }
             catch (HttpRequestException ex)
@@ -79,9 +100,15 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
-
+                AAA: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.DeleteAsync("http://localhost:46487/api/DB/" + inf.Id);
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
+                    HttpResponseMessage res = await test.DeleteAsync("http://localhost:46487/api/DB/" + inf.Id);
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto AAA;
+                    }
                 }
             }
             catch (HttpRequestException ex)
@@ -99,9 +126,15 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
-
+                BBB: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.DeleteAsync("http://localhost:29443/api/DB/" + inf.Id);
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
+                    HttpResponseMessage res = await test.DeleteAsync("http://localhost:29443/api/DB/" + inf.Id);
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto BBB;
+                    }
                 }
             }
             catch (HttpRequestException ex)
@@ -111,6 +144,53 @@ namespace WebApplication5.Controllers
                 return -1;
             }
             return 0;
+        }
+
+        private void gettokens()
+        {
+
+            string[] adress = new string[3];
+            adress[0] = "http://localhost:2051/Token";
+            adress[1] = "http://localhost:29443/Token";
+            adress[2] = "http://localhost:46487/Token";
+            int i, j;
+            j = 0;
+        ANUS:i = 0;
+            try
+            {
+                for (i = j; i < 3; i++)
+                    using (HttpClient test = new HttpClient())
+                    {
+                        var form = new Dictionary<string, string>  
+                        {  
+                           {"grant_type", "password"},  
+                           {"username", "ANUS" + (1+i).ToString()},  
+                           {"password", "111111"},  
+                        };
+                        //test.DefaultRequestHeaders.Accept.Clear();
+                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        var loginContent = new FormUrlEncodedContent(form);
+                        HttpResponseMessage res = test.PostAsync(adress[i], loginContent).Result;
+                        if (res.IsSuccessStatusCode)
+                        {
+                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                            EmpResponse = EmpResponse.Remove(0, 17);
+                            EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(",") - 1, EmpResponse.Length - EmpResponse.IndexOf(",") + 1);
+                            tokens[i] = EmpResponse;
+                            j = i;
+                        }
+                        else
+                        {
+                            j = i;
+                            goto ANUS;
+                        }
+
+                    }
+            }
+            catch (HttpRequestException ex)
+            {
+                goto ANUS;
+            }
         }
 
         // GET api/gate/login
@@ -160,13 +240,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep1: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:29443/api/DB"));
                             
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 CompInfo = EmpResponse;
+                            }
+                            if(res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep1;
                             }
                             logger.Info("Request  http://localhost:29443/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }
@@ -184,13 +271,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep2: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:2051/api/DB"));
 
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 WorkersInfo = EmpResponse;
+                            }
+                            if (res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep2;
                             }
                             logger.Info("Request  http://localhost:2051/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }
@@ -208,13 +302,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep3: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:46487/api/DB"));
 
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 RegionsInfo = EmpResponse;
+                            }
+                            if (res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep3;
                             }
                             logger.Info("Request  http://localhost:46487/api/DB. Answer status = {0} and Reason = {1}", res.StatusCode, res.ReasonPhrase);
                         }                        
@@ -246,13 +347,20 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep4: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                     HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:29443/api/DB"));
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication5.Models.companiesmodel>>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep4;
                     }
                 }
             }
@@ -280,13 +388,20 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep5: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                     HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:2051/api/DB"));
 
                     if (res.IsSuccessStatusCode)
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication5.Models.workermodel>>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep5;
                     }
                 }
             }
@@ -316,13 +431,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep6: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:29443/api/DB/"+id.ToString()));
 
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 CompInfo = EmpResponse;
+                            }
+                            if (res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep6;
                             }
                         }
                     }
@@ -339,13 +461,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep7: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:2051/api/DB/" + id.ToString()));
 
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 WorkersInfo = EmpResponse;
+                            }
+                            if (res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep7;
                             }
                         }
                     }
@@ -362,13 +491,20 @@ namespace WebApplication5.Controllers
                     {
                         using (HttpClient test = new HttpClient())
                         {
+                        rep8: test.DefaultRequestHeaders.Clear();
                             test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                             HttpResponseMessage res = await test.GetAsync(new Uri("http://localhost:46487/api/DB/" + id.ToString()));
 
                             if (res.IsSuccessStatusCode)
                             {
                                 var EmpResponse = res.Content.ReadAsStringAsync().Result;
                                 RegionsInfo = EmpResponse;
+                            }
+                            if (res.StatusCode == HttpStatusCode.Unauthorized)
+                            {
+                                gettokens();
+                                goto rep8;
                             }
                         }
                     }
@@ -411,7 +547,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep9: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:29443/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -420,6 +558,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[')+1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') , 2);
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<companiesmodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep9;
                     }
                 }
             }
@@ -468,7 +611,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep10: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:2051/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -477,6 +622,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject < workermodel > (EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep10;
                     }
                 }
             }
@@ -522,7 +672,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep11: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:29443/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -531,6 +683,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.companiesmodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep11;
                     }
                 }
             }
@@ -550,7 +707,9 @@ namespace WebApplication5.Controllers
                 using (HttpClient test = new HttpClient())
                 {
                     test.BaseAddress = new Uri("http://localhost:2051/");
+                rep12: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                     HttpResponseMessage res = await test.GetAsync("odata/CompInf?$filter=Company eq " + CompInfo.Id.ToString());
 
                     if (res.IsSuccessStatusCode)
@@ -559,6 +718,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
                         WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication5.Models.workermodel>>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep12;
                     }
                 }
             }
@@ -614,7 +778,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep13: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:46487/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -623,6 +789,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
                         CompInfo = EmpResponse;
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep13;
                     }
                 }
             }
@@ -655,7 +826,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep14: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:46487/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -664,6 +837,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication5.Models.personalinfmodel>>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep14;
                     }
                 }
             }
@@ -677,7 +855,7 @@ namespace WebApplication5.Controllers
         }
 
         // POST: api/Gate
-        [Authorize]
+
         [Route("~companies/add")]
         public async Task<IHttpActionResult> Post([FromBody]detailedCEOmodel baseinf)
         {
@@ -717,7 +895,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep15: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:46487/odata/CompInf?$filter=claster eq '" + regID.claster + "'");
 
                     if (res.IsSuccessStatusCode)
@@ -726,6 +906,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         regIDbuf = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.personalinfmodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep15;
                     }
                 }
             }
@@ -741,7 +926,9 @@ namespace WebApplication5.Controllers
                 {
                     using (HttpClient test = new HttpClient())
                     {
+                    rep16: test.DefaultRequestHeaders.Clear();
                         test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[2]);
                         HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:46487/api/DB", regID);
 
                         if (res.IsSuccessStatusCode)
@@ -752,6 +939,11 @@ namespace WebApplication5.Controllers
                         else
                         {
                             return Content(res.StatusCode, "Bad DATA. AAAAAAAA.");
+                        }
+                        if (res.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            gettokens();
+                            goto rep16;
                         }
                     }
                 }
@@ -773,8 +965,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
-
+                rep17: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:29443/odata/CompInf?$filter=region eq " + buf.region 
                         + " and " + "CEO eq '" + buf.CEO + "' and Name eq '" + buf.Name + "'");
 
@@ -784,6 +977,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         buf_t = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.companiesmodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep17;
                     }
                 }
             }
@@ -804,8 +1002,16 @@ namespace WebApplication5.Controllers
                 {
                     using (HttpClient test = new HttpClient())
                     {
+                    rep18: test.DefaultRequestHeaders.Clear();
                         test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                         HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:29443/api/DB", buf);
+
+                        if (res.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            gettokens();
+                            goto rep18;
+                        }
 
                         if (res.IsSuccessStatusCode)
                         {
@@ -821,6 +1027,7 @@ namespace WebApplication5.Controllers
                                 }
                             return Content(res.StatusCode, "Bad DATA. AAAAAAAA.");
                         }
+
                     }
                 }
                 else
@@ -846,8 +1053,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
-   
+                rep19: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:2051/odata/CompInf?$filter=FIO eq '" + buf2.FIO + "' and " +
                         "Cost eq " + buf2.Cost + " and RegionOffice eq " + buf2.RegionOffice + " and Company eq " + buf2.Company);
 
@@ -857,6 +1065,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         buf2_t = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.workermodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep19;
                     }
                 }
             }
@@ -881,8 +1094,16 @@ namespace WebApplication5.Controllers
                 {
                     using (HttpClient test = new HttpClient())
                     {
+                    rep20: test.DefaultRequestHeaders.Clear();
                         test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                         HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:2051/api/DB", buf2);
+
+                        if (res.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            gettokens();
+                            goto rep20;
+                        }
 
                         if (res.IsSuccessStatusCode)
                         {
@@ -929,7 +1150,7 @@ namespace WebApplication5.Controllers
         }
 
         // PUT: api/Gate/5
-        [Authorize]
+
         [Route("~companies/edit/{id:int=1}")]
         public async Task<IHttpActionResult> Put([FromUri] int id, [FromBody]companiesmodel value)
         {
@@ -949,8 +1170,15 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep21: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.PutAsJsonAsync("http://localhost:29443/api/DB/" + id.ToString(), value);
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
+                    HttpResponseMessage res = await test.PutAsJsonAsync("http://localhost:29443/api/DB/" + id.ToString(), value);
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep21;
+                    }
                 }
             }
             catch (HttpRequestException ex)
@@ -1004,7 +1232,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep22: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:29443/odata/CompInf" + requeststr);
 
                     if (res.IsSuccessStatusCode)
@@ -1013,6 +1243,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('[') + 1);
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']'), 2);
                         CompInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication5.Models.companiesmodel>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep22;
                     }
                 }
             }
@@ -1033,8 +1268,15 @@ namespace WebApplication5.Controllers
                 using (HttpClient test = new HttpClient())
                 {
                     test.BaseAddress = new Uri("http://localhost:29443/");
+                rep23: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    await test.DeleteAsync("api/DB/" + CompInfo.Id);                    
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[1]);                    
+                    HttpResponseMessage res = await test.DeleteAsync("api/DB/" + CompInfo.Id);
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep23;
+                    }
                 }
             }
             catch (HttpRequestException ex)
@@ -1048,7 +1290,9 @@ namespace WebApplication5.Controllers
             {
                 using (HttpClient test = new HttpClient())
                 {
+                rep24: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
                     HttpResponseMessage res = await test.GetAsync("http://localhost:2051/odata/CompInf?$filter=Company eq " + CompInfo.Id.ToString());
 
                     if (res.IsSuccessStatusCode)
@@ -1057,6 +1301,11 @@ namespace WebApplication5.Controllers
                         EmpResponse = EmpResponse.Remove(0, EmpResponse.IndexOf('['));
                         EmpResponse = EmpResponse.Remove(EmpResponse.IndexOf(']') + 1, 1);
                         WorkInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<List<WebApplication5.Models.workermodel>>(EmpResponse);
+                    }
+                    if (res.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        gettokens();
+                        goto rep24;
                     }
                 }
             }
@@ -1071,8 +1320,15 @@ namespace WebApplication5.Controllers
                 foreach (var t in WorkInfo)
                     using (HttpClient test = new HttpClient())
                     {
+                    rep25: test.DefaultRequestHeaders.Clear();
                         test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                        await test.DeleteAsync("http://localhost:2051/api/DB/" + t.Id);                        
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + tokens[0]);
+                        HttpResponseMessage res = await test.DeleteAsync("http://localhost:2051/api/DB/" + t.Id);
+                        if (res.StatusCode == HttpStatusCode.Unauthorized)
+                        {
+                            gettokens();
+                            goto rep25;
+                        }
                     }
             }
             catch (HttpRequestException ex)

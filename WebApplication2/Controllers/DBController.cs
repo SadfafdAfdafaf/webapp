@@ -26,6 +26,7 @@ namespace WebApplication2.Controllers
         }
 
         [EnableQuery]
+        [Authorize]
         public IQueryable<Worker> Get()
         {
             logger.Info("Request GET with OData");
@@ -56,6 +57,7 @@ namespace WebApplication2.Controllers
         private static Logger logger = LogManager.GetCurrentClassLogger();
 
         // GET api/DB
+        [Authorize]
         public IQueryable<Worker> GetWorkers()
         {
             logger.Info("Request GET");
@@ -63,6 +65,7 @@ namespace WebApplication2.Controllers
         }
 
         // GET api/DB/5
+        [Authorize]
         [ResponseType(typeof(Worker))]
         public async Task<IHttpActionResult> GetWorker(int id)
         {
@@ -79,6 +82,7 @@ namespace WebApplication2.Controllers
         }
 
         // PUT api/DB/5
+        [Authorize]
         public async Task<IHttpActionResult> PutWorker(int id, Worker worker)
         {
             logger.Info("Request PUT with ID = {0} FIO = {1} Company = {2} Cost = {3} RegionOffice = {4}", id, worker.FIO, worker.Company, worker.Cost, worker.RegionOffice);
@@ -119,6 +123,7 @@ namespace WebApplication2.Controllers
         }
 
         // POST api/DB
+        [Authorize]
         [ResponseType(typeof(Worker))]
         public async Task<IHttpActionResult> PostWorker(Worker worker)
         {
@@ -138,6 +143,7 @@ namespace WebApplication2.Controllers
         }
 
         // DELETE api/DB/5
+        [Authorize]
         [ResponseType(typeof(Worker))]
         public async Task<IHttpActionResult> DeleteWorker(int id)
         {

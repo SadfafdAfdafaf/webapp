@@ -15,7 +15,7 @@
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                     <span class="icon-bar"></span>
-                    <spadefault1n class="icon-bar"></spadefault1n>
+                    <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
                 @Html.ActionLink("Имя приложения", "Index", "Home", null, new { @class = "navbar-brand" })
@@ -24,7 +24,6 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Домашняя страница", "Index", "Home", new { area = "" }, null)</li>
                     <li>@Html.ActionLink("API", "Index", "Help", new { area = "" }, null)</li>
-                    <li>@Html.ActionLink("Действие с базой", "DBView", "Home", new { area = "" }, null)</li>
                 </ul>
             </div>
         </div>
