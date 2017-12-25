@@ -28,34 +28,50 @@ namespace WebApplication1.Controllers
         }
 
         // POST: /Account/Login
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Login(WebApplication1.Models.LoginViewModel model, string returnUrl)
+        public ActionResult Login()
         {
+            return Redirect(String.Format("http://localhost:56454/Users/Authenticate?redirect_uri={0}&client_id={1}", "http://localhost:55490/Hello/lootcodes", 1));
+            
+        }
 
-            using (HttpClient test = new HttpClient())
+        public async Task<ActionResult> lootcodes(string code, string state)
+        {
+            WebApplication1.Models.tokenmessage aaa = new WebApplication1.Models.tokenmessage();
+            WebApplication1.Models.authcodemoels bbb = new WebApplication1.Models.authcodemoels();
+
+            bbb.code = code;
+            bbb.redirect_uri = "http://localhost:55490";
+            bbb.grant_type = "code";
+            bbb.client_id = 1;
+
+            try
             {
-                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/login", model);
-
-                if (res.IsSuccessStatusCode)
+                using (HttpClient test = new HttpClient())
                 {
-                    var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                    EmpResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
-                    token = EmpResponse;
-                    HttpContext.Response.Cookies["token_name"].Value = token;
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Invalid username or password.");
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.PostAsJsonAsync(new Uri("http://localhost:56454/api/gate/code"), bbb);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        aaa = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.tokenmessage>(EmpResponse);
+                        HttpContext.Response.Cookies["access_token"].Value = aaa.access_token;
+                        HttpContext.Response.Cookies["refresh_token"].Value = aaa.refresh_token;
+                    }
+                    else
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        return View("sorry", (object)sss);
+                    }
                 }
             }
-
-            // Появление этого сообщения означает наличие ошибки; повторное отображение формы
-            return View(model);
+            catch
+            {
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
+            }
+            return View("lab4");
         }
 
         public async Task<ActionResult> getworkers()
@@ -442,6 +458,7 @@ namespace WebApplication1.Controllers
         
         public async Task<ActionResult> deletecompany(string company_name)
         {
+            int i = 0;
             try
             {
                 //HttpClientHandler handler = new HttpClientHandler();
@@ -451,8 +468,9 @@ namespace WebApplication1.Controllers
 
                 using (HttpClient test = new HttpClient())
                 {
+                l1: test.DefaultRequestHeaders.Clear();
                     test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    test.DefaultRequestHeaders.Add("Set-Cookie", HttpContext.Request.Cookies["token_name"].Value);
+                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + HttpContext.Request.Cookies["access_token"].Value);
                     HttpResponseMessage res = await test.DeleteAsync("http://localhost:56454/api/gate/~companies/delete/" + company_name);
 
                     if (res.IsSuccessStatusCode)
@@ -462,7 +480,35 @@ namespace WebApplication1.Controllers
                     else
                     {
                         var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        var sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        string sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                        if (sss != null)
+                        {
+                            return View("sorry", (object)sss);
+                        }
+                        if ((res.StatusCode == System.Net.HttpStatusCode.Unauthorized) && (i == 0))
+                        {
+                            test.DefaultRequestHeaders.Clear();
+                            test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            WebApplication1.Models.tokenmessage aaa = new WebApplication1.Models.tokenmessage();
+                            WebApplication1.Models.MyModel AAAAA = new WebApplication1.Models.MyModel();
+                            AAAAA.refreshtoken = HttpContext.Request.Cookies["refresh_token"].Value;
+                            res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/refresh", AAAAA);
+                            if (res.IsSuccessStatusCode)
+                            {
+                                var EmpResponse2 = res.Content.ReadAsStringAsync().Result;
+                                aaa = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.tokenmessage>(EmpResponse2);
+                                HttpContext.Request.Cookies["access_token"].Value = aaa.access_token;
+                                HttpContext.Request.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                HttpContext.Response.Cookies["access_token"].Value = aaa.access_token;
+                                HttpContext.Response.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                i++;
+                                goto l1;
+                            }
+                            else
+                            {
+                                return View("sorry", (object)"Сломалось рефрешение. Иди еще раз проси код. Че как не пасан.");
+                            }
+                        }                        
                         return View("sorry", (object)sss);
                     }
                 }

@@ -12,7 +12,7 @@ using PagedList.Mvc;
 using PagedList;
 using NLog;
 using System.Messaging;
-
+using DotNetOpenAuth.OAuth2;
 
 namespace WebApplication5.Controllers
 {
@@ -1203,13 +1203,21 @@ namespace WebApplication5.Controllers
             using (HttpClient test = new HttpClient())
             {
                 test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                IEnumerable<string> rawCookies = Request.Headers.GetValues("Set-Cookie");
-                string temp = rawCookies.First();
-                test.DefaultRequestHeaders.Add("Authorization", "Bearer " + temp);
-                HttpResponseMessage res = test.GetAsync("http://localhost:1804/test/token").Result;
+                if (Request.Headers.Authorization.Scheme != "Bearer")
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Bad Authorization.Scheme. Go away, Niger.");
+                }
+                var sss = Request.Headers.Authorization.Parameter;
+                authcheckmoels aaaa = new authcheckmoels();
+                aaaa.token = sss;
+                aaaa.requedrole = "ADMIN";
+
+                HttpResponseMessage res = await test.PostAsJsonAsync("http://localhost:17767/oauth/check", aaaa);
                 if(res.StatusCode == HttpStatusCode.Unauthorized)
                 {
-                    return Content(HttpStatusCode.Unauthorized, "Unauthorized");
+                    var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                    string asd = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse); 
+                    return Content(HttpStatusCode.Unauthorized, asd);
                 }
             }
 
@@ -1341,6 +1349,69 @@ namespace WebApplication5.Controllers
 
             logger.Info("Success compliete DELETE from {1} with parametr 'Name'= {0}", companyname, ip);
             return Ok(CompInfo);
+        }
+
+        [Route("code")]
+        public async Task<IHttpActionResult> Postcode([FromBody] authcodemoels AAAA)
+        {
+
+            tokenmessage code = new tokenmessage();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.PostAsJsonAsync(new Uri("http://localhost:17767/oauth/gettokens"), AAAA);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        code = Newtonsoft.Json.JsonConvert.DeserializeObject<tokenmessage>(EmpResponse);
+                    }
+                    else
+                    {
+                        return Unauthorized();
+                    }
+                }
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+
+
+            return Ok<tokenmessage>(code);                
+        }
+
+        [Route("refresh")]
+        public async Task<IHttpActionResult> Postrefresh([FromBody] MyModel AAAAAAAAAA)
+        {
+            tokenmessage code = new tokenmessage();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage res = await test.PostAsJsonAsync(new Uri("http://localhost:17767/oauth/refresh"), AAAAAAAAAA);
+
+                    if (res.IsSuccessStatusCode)
+                    {
+                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                        code = Newtonsoft.Json.JsonConvert.DeserializeObject<tokenmessage>(EmpResponse);
+                    }
+                    else
+                    {
+                        return Unauthorized();
+                    }
+                }
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+
+
+            return Ok<tokenmessage>(code);
         }
     }
 }

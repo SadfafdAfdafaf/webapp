@@ -54,4 +54,24 @@ namespace WebApplication1.Models
         public string pass { get; set; }
     }
 
+    public class authcodemoels
+    {
+        public string grant_type { get; set; }
+        public string code { get; set; }
+        public string redirect_uri { get; set; }
+        public int client_id { get; set; }
+    }
+
+    public class tokenmessage
+    {
+        public string access_token { get; set; }
+        public string refresh_token { get; set; }
+
+        public string token_type { get; set; }
+    }
+
+    public class MyModel
+    {
+        public string refreshtoken { get; set; }
+    }
 }
