@@ -1,0 +1,18 @@
+﻿
+@{
+    ViewBag.Title = "fig3";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>fig3</h2>
+
+@{
+    var myChart3 = new Chart(width: 600, height: 400)
+        .AddTitle("Типы запросов")
+        .AddSeries(
+            chartType: "Pie",
+            name: "Auth request",
+            xValue: new[] { "Success", "Lose" },
+            yValues: new[] { Model.gateinf1.auth, Model.gateinf1.anauth })
+        .Write();
+}

@@ -12,6 +12,7 @@ using System.Web.Http.Description;
 using WebApplication3.Models;
 using System.Web.OData;
 using NLog;
+using System.Messaging;
 
 namespace WebApplication3.Controllers
 {
@@ -46,9 +47,169 @@ namespace WebApplication3.Controllers
     public class DBController : ApiController
     {
         private ICompaniesContext db = new DBContext();
-
+        private FUUUUUUKContext db3 = new FUUUUUUKContext();
         // add these contructors
-        public DBController() { }
+        public DBController()
+        {
+            Task.Run(() => sendstat());
+        }
+
+        private async void recconf(FUUUUUUKContext db3)
+        {
+            Logger logger = LogManager.GetCurrentClassLogger();
+            MessageQueue queue;
+            if (MessageQueue.Exists(@".\private$\OutStat"))
+            {
+                queue = new MessageQueue(@".\private$\OutStat");
+            }
+            else
+            {
+                queue = MessageQueue.Create(".\\private$\\OutStat");
+            }
+
+            using (queue)
+            {
+                queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(outstatmes) });
+
+                Message[] msgs = queue.GetAllMessages();
+
+                List<string> msgsuid = new List<string>();
+                List<outstatmes> bodylst = new List<outstatmes>();
+
+                foreach (var m in msgs)
+                {
+                    if (m.Label == "ANCOMP")
+                    {
+                        queue.ReceiveById(m.Id);
+                        bodylst.Add((outstatmes)m.Body);
+                    }
+                }
+
+                foreach (var m in bodylst)
+                {
+                    switch (m.status)
+                    {
+                        case 0:
+                            var eee = db3.instatmes.Find(m.mes.Id);
+                            if (eee != null)
+                            {
+                                db3.instatmes.Remove(eee);
+                                try
+                                {
+                                    await db3.SaveChangesAsync();
+                                }
+                                catch (DbUpdateConcurrencyException ex)
+                                {
+                                    ex.Entries.Single().Reload();
+                                }
+                            }
+                            break;
+                        case -1:
+                            var eee1 = db3.instatmes.Find(m.mes.Id);
+                            if (eee1 != null)
+                            {
+                                logger.Error("ERR in Stat. Deleted data from db. Mess:" + m.Error);
+                                db3.instatmes.Remove(eee1);
+                                try
+                                {
+                                    await db3.SaveChangesAsync();
+                                }
+                                catch (DbUpdateConcurrencyException ex)
+                                {
+                                    ex.Entries.Single().Reload();
+                                }
+
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                await db3.SaveChangesAsync();
+                return;
+            }
+        }
+
+        private async void sendstat()
+        {
+            FUUUUUUKContext db3 = new FUUUUUUKContext();
+            MessageQueue queue;
+            if (MessageQueue.Exists(@".\private$\InStat"))
+            {
+                queue = new MessageQueue(@".\private$\InStat");
+            }
+            else
+            {
+                queue = MessageQueue.Create(".\\private$\\InStat");
+            }
+
+            using (queue)
+            {
+                queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(instatmes) });
+                while (true)
+                {
+
+                    await db3.SaveChangesAsync();
+                    List<instatmes> sss = new List<instatmes>();
+                    try
+                    {
+                        await Task.Run(() => recconf(db3));
+
+                        TimeSpan interval = new TimeSpan(0, 2, 30);
+                        System.Threading.Thread.Sleep(interval);
+
+                        sss = db3.instatmes.ToList();
+                        foreach (var qwe in sss)
+                        {
+                            if (qwe.Np < 3)
+                            {
+                                qwe.Np++;
+                                queue.Send(qwe);
+                                try
+                                {
+                                    db3.Entry(qwe).State = EntityState.Modified;
+                                    db3.SaveChanges();
+                                }
+                                catch (Exception)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+
+                    }
+                    catch
+                    {
+                        TimeSpan interval = new TimeSpan(0, 2, 0);
+                        System.Threading.Thread.Sleep(interval);
+                    }
+                }
+
+            }
+        }
+
+        private async void putdata(string inf, request_type ttt)
+        {
+            FUUUUUUKContext db3 = new FUUUUUUKContext();
+            instatmes m = new instatmes();
+            m.detail = inf;
+            m.request_type = ttt;
+            m.server_name = server_name.COMP;
+            m.Time = DateTime.Now;
+            m.state = Guid.NewGuid();
+
+            try
+            {
+                db3.instatmes.Add(m);
+                await db3.SaveChangesAsync();
+            }
+            catch
+            {
+                return;
+            }
+
+        }
 
         public DBController(ICompaniesContext context)
         {
@@ -84,6 +245,7 @@ namespace WebApplication3.Controllers
         [Authorize]
         public async Task<IHttpActionResult> Putcompanies(int id, companies companies)
         {
+            await Task.Run(() => putdata("PUT COMPANIE", request_type.CHANGE));
             logger.Info("Request PUT with ID = {0} Name = {1} CEO = {2} region = {3}", id, companies.Name, companies.CEO, companies.region);
             if (!ModelState.IsValid)
             {
@@ -126,6 +288,7 @@ namespace WebApplication3.Controllers
         [ResponseType(typeof(companies))]
         public async Task<IHttpActionResult> Postcompanies(companies companies)
         {
+            await Task.Run(() => putdata("POST COMPANIE", request_type.CHANGE));
             logger.Info("Request POST with Name = {0} CEO = {1} region = {2}", companies.Name, companies.CEO, companies.region);
             if (!ModelState.IsValid)
             {
@@ -145,6 +308,7 @@ namespace WebApplication3.Controllers
         [ResponseType(typeof(companies))]
         public async Task<IHttpActionResult> Deletecompanies(int id)
         {
+            await Task.Run(() => putdata("DELETE COMPANIE", request_type.CHANGE));
             logger.Info("Request DELETE with ID = {0}", id);
             companies companies = await db.companies.FindAsync(id);
             if (companies == null)

@@ -12,6 +12,7 @@ using System.Web.Http.Description;
 using WebApplication2.Models;
 using System.Web.OData;
 using NLog;
+using System.Messaging;
 
 namespace WebApplication2.Controllers
 {
@@ -44,10 +45,168 @@ namespace WebApplication2.Controllers
 
     public class DBController : ApiController
     {
-        private IWorkerContext db = new DBContext();
+        private IWorkerContext db = new DBContext();        
 
         // add these contructors
-        public DBController() { }
+        public DBController()
+        {
+            Task.Run(() => sendstat());
+        }
+
+        private async void recconf(Fuck2Context db4)
+        {
+            Logger logger = LogManager.GetCurrentClassLogger();
+            MessageQueue queue;
+            if (MessageQueue.Exists(@".\private$\OutStat"))
+            {
+                queue = new MessageQueue(@".\private$\OutStat");
+            }
+            else
+            {
+                queue = MessageQueue.Create(".\\private$\\OutStat");
+            }
+
+            using (queue)
+            {
+                queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(outstatmes) });
+
+                Message[] msgs = queue.GetAllMessages();
+
+                List<string> msgsuid = new List<string>();
+                List<outstatmes> bodylst = new List<outstatmes>();
+
+                foreach (var m in msgs)
+                {
+                    if (m.Label == "ANPERS")
+                    {
+                        queue.ReceiveById(m.Id);
+                        bodylst.Add((outstatmes)m.Body);
+                    }
+                }
+
+                foreach (var m in bodylst)
+                {
+                    switch (m.status)
+                    {
+                        case 0:
+                            var eee = db4.instatmes.Find(m.mes.Id);
+                            if (eee != null)
+                            {
+                                db4.instatmes.Remove(eee);
+                                try
+                                {
+                                    await db4.SaveChangesAsync();
+                                }
+                                catch (DbUpdateConcurrencyException ex)
+                                {
+                                    ex.Entries.Single().Reload();
+                                }
+                            }
+                            break;
+                        case -1:
+                            var eee1 = db4.instatmes.Find(m.mes.Id);
+                            if (eee1 != null)
+                            {
+                                logger.Error("ERR in Stat. Deleted data from db. Mess:" + m.Error);
+                                db4.instatmes.Remove(eee1);
+                                try
+                                {
+                                    await db4.SaveChangesAsync();
+                                }
+                                catch (DbUpdateConcurrencyException ex)
+                                {
+                                    ex.Entries.Single().Reload();
+                                }
+
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                await db4.SaveChangesAsync();
+                return;
+            }
+        }
+
+        private async void sendstat()
+        {
+            Fuck2Context db4 = new Fuck2Context();
+            MessageQueue queue;
+            if (MessageQueue.Exists(@".\private$\InStat"))
+            {
+                queue = new MessageQueue(@".\private$\InStat");
+            }
+            else
+            {
+                queue = MessageQueue.Create(".\\private$\\InStat");
+            }
+
+            using (queue)
+            {
+                queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(instatmes) });
+                while (true)
+                {
+                    await db4.SaveChangesAsync();
+                    List<instatmes> sss = new List<instatmes>();
+                    try
+                    {
+                        await Task.Run(() => recconf(db4));
+
+                        TimeSpan interval = new TimeSpan(0, 2, 30);
+                        System.Threading.Thread.Sleep(interval);
+
+                        sss = db4.instatmes.ToList();
+                        foreach (var qwe in sss)
+                        {
+                            if (qwe.Np < 3)
+                            {
+                                qwe.Np++;
+                                queue.Send(qwe);
+                                try
+                                {
+                                    db4.Entry(qwe).State = EntityState.Modified;
+                                    db4.SaveChanges();
+                                }
+                                catch (Exception)
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+
+                    }
+                    catch
+                    {
+                        TimeSpan interval = new TimeSpan(0, 2, 0);
+                        System.Threading.Thread.Sleep(interval);
+                    }
+                }
+            }
+        }
+
+        private async void putdata(string inf, request_type ttt)
+        {
+            Fuck2Context db4 = new Fuck2Context();
+            instatmes m = new instatmes();
+            m.detail = inf;
+            m.request_type = ttt;
+            m.server_name = server_name.PERS;
+            m.Time = DateTime.Now;
+            m.state = Guid.NewGuid();
+
+            try
+            {
+                db4.instatmes.Add(m);
+                await db4.SaveChangesAsync();
+            }
+            catch
+            {
+                return;
+            }
+
+        }
 
         public DBController(IWorkerContext context)
         {
@@ -85,6 +244,7 @@ namespace WebApplication2.Controllers
         [Authorize]
         public async Task<IHttpActionResult> PutWorker(int id, Worker worker)
         {
+            await Task.Run(() => putdata("PUT WORKER", request_type.CHANGE));
             logger.Info("Request PUT with ID = {0} FIO = {1} Company = {2} Cost = {3} RegionOffice = {4}", id, worker.FIO, worker.Company, worker.Cost, worker.RegionOffice);
             if (!ModelState.IsValid)
             {
@@ -127,6 +287,7 @@ namespace WebApplication2.Controllers
         [ResponseType(typeof(Worker))]
         public async Task<IHttpActionResult> PostWorker(Worker worker)
         {
+            await Task.Run(() => putdata("POST WORKER", request_type.CHANGE));
             logger.Info("Request POST with FIO = {0} Company = {1} Cost = {2} RegionOffice = {3}", worker.FIO, worker.Company, worker.Cost, worker.RegionOffice);
             if (!ModelState.IsValid)
             {
@@ -147,6 +308,7 @@ namespace WebApplication2.Controllers
         [ResponseType(typeof(Worker))]
         public async Task<IHttpActionResult> DeleteWorker(int id)
         {
+            await Task.Run(() => putdata("DELETE WORKER", request_type.CHANGE));
             logger.Info("Request DELETE with ID = {0}", id);
             Worker worker = await db.Workers.FindAsync(id);
             if (worker == null)

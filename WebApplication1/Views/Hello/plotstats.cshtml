@@ -1,0 +1,872 @@
+﻿@model WebApplication1.Models.statinf
+
+@using System;
+@using System.Collections;
+
+@{
+    ViewBag.Title = "plotstats";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>plotstats</h2>
+
+@{
+    var filePathName = "_ChartFiles/chart01.jpg";
+
+    var myChart = new Chart(width: 600, height: 400)
+    .AddTitle("Загрузка системы по часам")
+    .AddSeries(
+        name: "Load",
+        xValue: new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" },
+        yValues: Model.gateinf1.rasp.ToArray());
+    myChart.Save(path: filePathName);
+    
+}
+
+@{
+    var filePathName2 = "_ChartFiles/chart02.jpg";
+
+    var myChart2 = new Chart(width: 600, height: 400)
+    .AddTitle("Типы запросов")
+    .AddSeries(
+        name: "Req",
+        xValue: new[] { "GET", "CHANGE", "LOGIN" },
+        yValues: Model.gateinf1.resp2.ToArray());
+    myChart2.Save(path: filePathName2);
+    
+}
+
+@{
+    var filePathName3 = "_ChartFiles/chart03.jpg";
+
+    var myChart3 = new Chart(width: 600, height: 400)
+    .AddTitle("Типы запросов")
+    .AddSeries(
+        chartType: "Pie",
+        name: "Auth request",
+        xValue: new[] { "Success", "Lose" },
+        yValues: new[] { Model.gateinf1.auth, Model.gateinf1.anauth });
+    myChart3.Save(path: filePathName3);
+    
+}
+
+@{
+    var filePathName4 = "_ChartFiles/chart04.jpg";
+
+    var myChart4 = new Chart(width: 600, height: 400)
+    .AddTitle("Запросы на сервис компаний")
+    .AddSeries(
+        name: "ReqCOM",
+        xValue: new[] { "PUT", "POST", "DELET" },
+        yValues: Model.miniinf1.resp2.ToArray());
+    myChart4.Save(path: filePathName4);
+    
+}
+
+@{
+    var filePathName5 = "_ChartFiles/chart05.jpg";
+
+    var myChart5 = new Chart(width: 600, height: 400)
+    .AddTitle("Запросы на сервис работников")
+    .AddSeries(
+        name: "ReqWOR",
+        xValue: new[] { "PUT", "POST", "DELET" },
+        yValues: Model.miniinf2.resp2.ToArray());
+    myChart5.Save(path: filePathName5);
+    
+}
+
+@{
+    var filePathName6 = "_ChartFiles/chart06.jpg";
+
+    
+    var myChart6 = new Chart(width: 600, height: 400)
+    .AddTitle("Запросы на сервис регионов")
+    .AddSeries(
+        name: "ReqREG",
+        xValue: new[] { "PUT", "POST", "DELET" },
+        yValues: Model.miniinf3.resp2.ToArray());
+    myChart6.Save(path: filePathName6);
+    
+}
+
+@{
+    var filePathName7 = "_ChartFiles/chart07.jpg";
+
+    var myChart7 = new Chart(width: 600, height: 400)
+    .AddTitle("Распределение по времени запросов на сервис компаний")
+    .AddSeries(
+        name: "ReqCOM",
+        xValue: new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" },
+        yValues: Model.miniinf1.rasp.ToArray());
+    myChart7.Save(path: filePathName7);
+
+}
+
+@{
+    var filePathName8 = "_ChartFiles/chart08.jpg";
+
+    var myChart8 = new Chart(width: 600, height: 400)
+    .AddTitle("Распределение по времени запросов на сервис работников")
+    .AddSeries(
+        name: "ReqWOR",
+        xValue: new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" },
+        yValues: Model.miniinf2.rasp.ToArray());
+    myChart8.Save(path: filePathName8);
+    
+}
+
+@{
+    var filePathName9 = "_ChartFiles/chart09.jpg";
+
+    var myChart9 = new Chart(width: 600, height: 400)
+    .AddTitle("Распределение по времени запросов на сервис регионов")
+    .AddSeries(
+        name: "ReqREG",
+        xValue: new[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" },
+        yValues: Model.miniinf3.rasp.ToArray());
+    myChart9.Save(path: filePathName9);
+    
+}
+
+<table class="table" title="Соотношение авторизаций">
+    <tr>
+        <th>
+            Успешно
+        </th>
+        <th>
+            Провально
+        </th>
+    </tr>
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.auth)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.anauth)
+        </td>
+    </tr>
+
+</table>
+
+<table class="table" title="Типы запросов в системе">
+    <tr>
+        <th>
+            GET
+        </th>
+        <th>
+            CHANGE
+        </th>
+        <th>
+            LOGIN
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.resp2[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.resp2[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.resp2[2])
+        </td>
+    </tr>
+
+</table>
+
+<table class="table" title="Распределение запросов по времени">
+    <tr>
+        <th>
+            0
+        </th>
+        <th>
+            1
+        </th>
+        <th>
+            2
+        </th>
+        <th>
+            3
+        </th>
+        <th>
+            4
+        </th>
+        <th>
+            5
+        </th>
+        <th>
+            6
+        </th>
+        <th>
+            7
+        </th>
+        <th>
+            8
+        </th>
+        <th>
+            9
+        </th>
+        <th>
+            10
+        </th>
+        <th>
+            11
+        </th>
+        <th>
+            12
+        </th>
+        <th>
+            13
+        </th>
+        <th>
+            14
+        </th>
+        <th>
+            15
+        </th>
+        <th>
+            16
+        </th>
+        <th>
+            17
+        </th>
+        <th>
+            18
+        </th>
+        <th>
+            19
+        </th>
+        <th>
+            20
+        </th>
+        <th>
+            21
+        </th>
+        <th>
+            22
+        </th>
+        <th>
+            23
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[2])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[3])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[4])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[5])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[6])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[7])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[8])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[9])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[10])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[11])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[12])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[13])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[14])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[15])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[16])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[17])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[18])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[19])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[20])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[21])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[22])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.gateinf1.rasp[23])
+        </td>
+    </tr>
+
+</table>
+
+<<table class="table" title="Запросы на сервис компаний">
+    <tr>
+        <th>
+            PUT
+        </th>
+        <th>
+            POST
+        </th>
+        <th>
+            DELETE
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.resp2[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.resp2[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.resp2[2])
+        </td>
+    </tr>
+
+</table>
+
+<<table class="table" title="Запросы на сервис работников">
+    <tr>
+        <th>
+            PUT
+        </th>
+        <th>
+            POST
+        </th>
+        <th>
+            DELETE
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.resp2[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.resp2[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.resp2[2])
+        </td>
+    </tr>
+
+</table>
+
+<<table class="table" title="Запросы на сервис регионов">
+    <tr>
+        <th>
+            PUT
+        </th>
+        <th>
+            POST
+        </th>
+        <th>
+            DELETE
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.resp2[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.resp2[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.resp2[2])
+        </td>
+    </tr>
+
+</table>
+
+<table class="table" title="Распределение запросов по времени на сервис компаний">
+    <tr>
+        <th>
+            0
+        </th>
+        <th>
+            1
+        </th>
+        <th>
+            2
+        </th>
+        <th>
+            3
+        </th>
+        <th>
+            4
+        </th>
+        <th>
+            5
+        </th>
+        <th>
+            6
+        </th>
+        <th>
+            7
+        </th>
+        <th>
+            8
+        </th>
+        <th>
+            9
+        </th>
+        <th>
+            10
+        </th>
+        <th>
+            11
+        </th>
+        <th>
+            12
+        </th>
+        <th>
+            13
+        </th>
+        <th>
+            14
+        </th>
+        <th>
+            15
+        </th>
+        <th>
+            16
+        </th>
+        <th>
+            17
+        </th>
+        <th>
+            18
+        </th>
+        <th>
+            19
+        </th>
+        <th>
+            20
+        </th>
+        <th>
+            21
+        </th>
+        <th>
+            22
+        </th>
+        <th>
+            23
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[2])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[3])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[4])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[5])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[6])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[7])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[8])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[9])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[10])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[11])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[12])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[13])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[14])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[15])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[16])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[17])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[18])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[19])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[20])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[21])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[22])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf1.rasp[23])
+        </td>
+    </tr>
+
+</table>
+
+<table class="table" title="Распределение запросов по времени на сервис работников">
+    <tr>
+        <th>
+            0
+        </th>
+        <th>
+            1
+        </th>
+        <th>
+            2
+        </th>
+        <th>
+            3
+        </th>
+        <th>
+            4
+        </th>
+        <th>
+            5
+        </th>
+        <th>
+            6
+        </th>
+        <th>
+            7
+        </th>
+        <th>
+            8
+        </th>
+        <th>
+            9
+        </th>
+        <th>
+            10
+        </th>
+        <th>
+            11
+        </th>
+        <th>
+            12
+        </th>
+        <th>
+            13
+        </th>
+        <th>
+            14
+        </th>
+        <th>
+            15
+        </th>
+        <th>
+            16
+        </th>
+        <th>
+            17
+        </th>
+        <th>
+            18
+        </th>
+        <th>
+            19
+        </th>
+        <th>
+            20
+        </th>
+        <th>
+            21
+        </th>
+        <th>
+            22
+        </th>
+        <th>
+            23
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[2])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[3])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[4])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[5])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[6])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[7])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[8])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[9])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[10])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[11])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[12])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[13])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[14])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[15])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[16])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[17])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[18])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[19])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[20])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[21])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[22])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf2.rasp[23])
+        </td>
+    </tr>
+
+</table>
+
+<table class="table" title="Распределение запросов по времени на ресвис регионов">
+    <tr>
+        <th>
+            0
+        </th>
+        <th>
+            1
+        </th>
+        <th>
+            2
+        </th>
+        <th>
+            3
+        </th>
+        <th>
+            4
+        </th>
+        <th>
+            5
+        </th>
+        <th>
+            6
+        </th>
+        <th>
+            7
+        </th>
+        <th>
+            8
+        </th>
+        <th>
+            9
+        </th>
+        <th>
+            10
+        </th>
+        <th>
+            11
+        </th>
+        <th>
+            12
+        </th>
+        <th>
+            13
+        </th>
+        <th>
+            14
+        </th>
+        <th>
+            15
+        </th>
+        <th>
+            16
+        </th>
+        <th>
+            17
+        </th>
+        <th>
+            18
+        </th>
+        <th>
+            19
+        </th>
+        <th>
+            20
+        </th>
+        <th>
+            21
+        </th>
+        <th>
+            22
+        </th>
+        <th>
+            23
+        </th>
+    </tr>
+
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[0])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[1])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[2])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[3])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[4])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[5])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[6])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[7])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[8])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[9])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[10])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[11])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[12])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[13])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[14])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[15])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[16])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[17])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[18])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[19])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[20])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[21])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[22])
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => Model.miniinf3.rasp[23])
+        </td>
+    </tr>
+
+</table>
+
+<p>Визуализацию можно посмотреть на сервере.</p>

@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "fig6";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>fig6</h2>
+
+@{
+    var myChart6 = new Chart(width: 600, height: 400)
+        .AddTitle("Запросы на сервис регионов")
+        .AddSeries(
+            name: "ReqREG",
+            xValue: new[] { "PUT", "POST", "DELET" },
+            yValues: Model.miniinf3.resp2.ToArray())
+        .Write();
+}

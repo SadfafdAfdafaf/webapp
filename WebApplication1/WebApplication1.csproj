@@ -141,6 +141,8 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web.DataVisualization" />
+    <Reference Include="System.Web.DataVisualization.Design" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -312,6 +314,16 @@
     <Content Include="Views\Hello\getregionspage.cshtml" />
     <Content Include="Views\Hello\sorry.cshtml" />
     <Content Include="Views\Hello\Login.cshtml" />
+    <Content Include="Views\Hello\plotstats.cshtml" />
+    <Content Include="Views\Hello\fig9.cshtml" />
+    <Content Include="Views\Hello\fig8.cshtml" />
+    <Content Include="Views\Hello\fig7.cshtml" />
+    <Content Include="Views\Hello\fig6.cshtml" />
+    <Content Include="Views\Hello\fig5.cshtml" />
+    <Content Include="Views\Hello\fig4.cshtml" />
+    <Content Include="Views\Hello\fig3.cshtml" />
+    <Content Include="Views\Hello\fig2.cshtml" />
+    <Content Include="Views\Hello\fig1.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

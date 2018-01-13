@@ -8,6 +8,8 @@ using System.Net.Http.Headers;
 using System.Web.Mvc;
 using PagedList.Mvc;
 using PagedList;
+using System.Web.UI.DataVisualization;
+using System.Web.UI.DataVisualization.Charting;
 
 namespace WebApplication1.Controllers
 {
@@ -461,55 +463,54 @@ namespace WebApplication1.Controllers
             int i = 0;
             try
             {
-                //HttpClientHandler handler = new HttpClientHandler();
-                //handler.UseCookies = true;
-                //handler.CookieContainer = new System.Net.CookieContainer();
-                //handler.CookieContainer.Add(new System.Net.Cookie("token_name", token));
-
                 using (HttpClient test = new HttpClient())
                 {
-                l1: test.DefaultRequestHeaders.Clear();
-                    test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    test.DefaultRequestHeaders.Add("Authorization", "Bearer " + HttpContext.Request.Cookies["access_token"].Value);
-                    HttpResponseMessage res = await test.DeleteAsync("http://localhost:56454/api/gate/~companies/delete/" + company_name);
+                    int suka = -1;
+                    while (suka != 0)
+                    {
+                        test.DefaultRequestHeaders.Clear();
+                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + HttpContext.Request.Cookies["access_token"].Value);
+                        HttpResponseMessage res = await test.DeleteAsync("http://localhost:56454/api/gate/~companies/delete/" + company_name);
 
-                    if (res.IsSuccessStatusCode)
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                    }
-                    else
-                    {
-                        var EmpResponse = res.Content.ReadAsStringAsync().Result;
-                        string sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
-                        if (sss != null)
+                        if (res.IsSuccessStatusCode)
                         {
+                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                            suka = 0;
+                        }
+                        else
+                        {
+                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                            string sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                            if (sss != null)
+                            {
+                                return View("sorry", (object)sss);
+                            }
+                            if ((res.StatusCode == System.Net.HttpStatusCode.Unauthorized) && (i == 0))
+                            {
+                                test.DefaultRequestHeaders.Clear();
+                                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                                WebApplication1.Models.tokenmessage aaa = new WebApplication1.Models.tokenmessage();
+                                WebApplication1.Models.MyModel AAAAA = new WebApplication1.Models.MyModel();
+                                AAAAA.refreshtoken = HttpContext.Request.Cookies["refresh_token"].Value;
+                                res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/refresh", AAAAA);
+                                if (res.IsSuccessStatusCode)
+                                {
+                                    var EmpResponse2 = res.Content.ReadAsStringAsync().Result;
+                                    aaa = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.tokenmessage>(EmpResponse2);
+                                    HttpContext.Request.Cookies["access_token"].Value = aaa.access_token;
+                                    HttpContext.Request.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                    HttpContext.Response.Cookies["access_token"].Value = aaa.access_token;
+                                    HttpContext.Response.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                    i++;                                    
+                                }
+                                else
+                                {
+                                    return View("sorry", (object)"Сломалось рефрешение. Иди еще раз проси код. Че как не пасан.");
+                                }
+                            }
                             return View("sorry", (object)sss);
                         }
-                        if ((res.StatusCode == System.Net.HttpStatusCode.Unauthorized) && (i == 0))
-                        {
-                            test.DefaultRequestHeaders.Clear();
-                            test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                            WebApplication1.Models.tokenmessage aaa = new WebApplication1.Models.tokenmessage();
-                            WebApplication1.Models.MyModel AAAAA = new WebApplication1.Models.MyModel();
-                            AAAAA.refreshtoken = HttpContext.Request.Cookies["refresh_token"].Value;
-                            res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/refresh", AAAAA);
-                            if (res.IsSuccessStatusCode)
-                            {
-                                var EmpResponse2 = res.Content.ReadAsStringAsync().Result;
-                                aaa = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.tokenmessage>(EmpResponse2);
-                                HttpContext.Request.Cookies["access_token"].Value = aaa.access_token;
-                                HttpContext.Request.Cookies["refresh_token"].Value = aaa.refresh_token;
-                                HttpContext.Response.Cookies["access_token"].Value = aaa.access_token;
-                                HttpContext.Response.Cookies["refresh_token"].Value = aaa.refresh_token;
-                                i++;
-                                goto l1;
-                            }
-                            else
-                            {
-                                return View("sorry", (object)"Сломалось рефрешение. Иди еще раз проси код. Че как не пасан.");
-                            }
-                        }                        
-                        return View("sorry", (object)sss);
                     }
                 }
             }
@@ -563,6 +564,74 @@ namespace WebApplication1.Controllers
 
 
             return View();
+        }
+
+        public async Task<ActionResult> plotstats()
+        {
+            int i = 0;
+            WebApplication1.Models.statinf ANUS = new WebApplication1.Models.statinf();
+            try
+            {
+                using (HttpClient test = new HttpClient())
+                {
+                    int suka = -1;
+                    while (suka != 0)
+                    {
+                        test.DefaultRequestHeaders.Clear();
+                        test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                        test.DefaultRequestHeaders.Add("Authorization", "Bearer " + HttpContext.Request.Cookies["access_token"].Value);
+                        HttpResponseMessage res = await test.GetAsync("http://localhost:56454/api/gate/GETFUCKINGSTATISTIC");
+
+                        if (res.IsSuccessStatusCode)
+                        {
+                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                            ANUS = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.statinf>(EmpResponse);
+                            suka = 0;
+                        }
+                        else
+                        {
+                            var EmpResponse = res.Content.ReadAsStringAsync().Result;
+                            string sss = Newtonsoft.Json.JsonConvert.DeserializeObject<string>(EmpResponse);
+                            if (sss != null)
+                            {
+                                return View("sorry", (object)sss);
+                            }
+                            if ((res.StatusCode == System.Net.HttpStatusCode.Unauthorized) && (i == 0))
+                            {
+                                test.DefaultRequestHeaders.Clear();
+                                test.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                                WebApplication1.Models.tokenmessage aaa = new WebApplication1.Models.tokenmessage();
+                                WebApplication1.Models.MyModel AAAAA = new WebApplication1.Models.MyModel();
+                                AAAAA.refreshtoken = HttpContext.Request.Cookies["refresh_token"].Value;
+                                res = await test.PostAsJsonAsync("http://localhost:56454/api/gate/refresh", AAAAA);
+                                if (res.IsSuccessStatusCode)
+                                {
+                                    var EmpResponse2 = res.Content.ReadAsStringAsync().Result;
+                                    aaa = Newtonsoft.Json.JsonConvert.DeserializeObject<WebApplication1.Models.tokenmessage>(EmpResponse2);
+                                    HttpContext.Request.Cookies["access_token"].Value = aaa.access_token;
+                                    HttpContext.Request.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                    HttpContext.Response.Cookies["access_token"].Value = aaa.access_token;
+                                    HttpContext.Response.Cookies["refresh_token"].Value = aaa.refresh_token;
+                                    i++;                                    
+                                }
+                                else
+                                {
+                                    return View("sorry", (object)"Сломалось рефрешение. Иди еще раз проси код. Че как не пасан.");
+                                }
+                            }
+                            return View("sorry", (object)sss);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                string myString = "System is unavalieable. lol.";
+                return View("sorry", (object)myString);
+            }
+
+
+            return View(ANUS);
         }
         
 	}

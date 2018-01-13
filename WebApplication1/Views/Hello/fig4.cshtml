@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "fig4";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>fig4</h2>
+
+@{
+    var myChart4 = new Chart(width: 600, height: 400)
+        .AddTitle("Запросы на сервис компаний")
+        .AddSeries(
+            name: "ReqCOM",
+            xValue: new[] { "PUT", "POST", "DELET" },
+            yValues: Model.miniinf1.resp2.ToArray())
+        .Write();
+}

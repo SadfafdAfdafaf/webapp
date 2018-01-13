@@ -74,4 +74,31 @@ namespace WebApplication1.Models
     {
         public string refreshtoken { get; set; }
     }
+
+    public class gateinf
+    {
+        public int anauth { get; set; }
+        public int auth { get; set; }
+
+        public List<int> rasp { get; set; }
+        public List<int> resp2 { get; set; }
+
+    }
+
+    public class miniinf
+    {
+
+        public List<int> rasp { get; set; }
+        public List<int> resp2 { get; set; }
+
+    }
+
+    public class statinf
+    {
+        public miniinf miniinf1 { get; set; }
+        public miniinf miniinf2 { get; set; }
+        public miniinf miniinf3 { get; set; }
+
+        public gateinf gateinf1 { get; set; }
+    }
 }

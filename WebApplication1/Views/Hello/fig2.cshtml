@@ -1,0 +1,17 @@
+﻿
+@{
+    ViewBag.Title = "fig2";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>fig2</h2>
+
+@{
+    var myChart2 = new Chart(width: 600, height: 400)
+        .AddTitle("Типы запросов")
+        .AddSeries(
+            name: "Req",
+            xValue: new[] { "GET", "CHANGE", "LOGIN" },
+            yValues: Model.gateinf1.resp2.ToArray())
+        .Write();
+}
